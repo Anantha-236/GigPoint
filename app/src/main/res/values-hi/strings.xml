@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">DhwaniMitra</string>
+    <string name="login_subtitle">आपकी आवाज़। आपका व्यवसाय। आपका साथी।</string>
+    <string name="welcome_back">वापसी पर स्वागत है</string>
+    <string name="email">ईमेल</string>
+    <string name="password">पासवर्ड</string>
+    <string name="confirm_password">पासवर्ड की पुष्टि करें</string>
+    <string name="login">लॉगिन</string>
+    <string name="create_account">नए हैं? खाता बनाएँ</string>
+    <string name="create_account_title">खाता बनाएँ</string>
+    <string name="already_have_account">पहले से खाता है? लॉगिन करें</string>
+    <string name="tell_us_business">अपना व्यवसाय सेट करें</string>
+    <string name="owner_name">मालिक का नाम</string>
+    <string name="shop_name">दुकान / व्यवसाय का नाम</string>
+    <string name="gstin_optional">GSTIN (वैकल्पिक)</string>
+    <string name="business_type">व्यवसाय का प्रकार</string>
+    <string name="preferred_language">पसंदीदा भाषा</string>
+    <string name="appearance">थीम</string>
+    <string name="continue_to_dhwani_mitra">DhwaniMitra में आगे बढ़ें</string>
+    <string name="start">शुरू करें</string>
+</resources>

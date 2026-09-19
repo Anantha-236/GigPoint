@@ -1,0 +1,5 @@
+-- Optional development-only sample data.
+-- Run this only after creating/logging in a test user and completing business setup.
+--
+-- The main app should create UUIDs locally for products/variants/transactions.
+-- This file intentionally does not create an auth user.
