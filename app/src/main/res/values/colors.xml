@@ -1,10 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <color name="primary">#146B52</color>
+    <color name="primary_dark">#0B4D3B</color>
+    <color name="primary_soft">#E8F5F0</color>
+
+    <color name="success">#197A55</color>
+    <color name="warning">#B26A00</color>
+    <color name="warning_soft">#FFF4DD</color>
+    <color name="danger">#B3261E</color>
+
+    <color name="bg_screen">#F6F8F7</color>
+    <color name="card_bg">#FFFFFFFF</color>
+    <color name="outline">#DDE5E1</color>
+    <color name="text_primary">#17221E</color>
+    <color name="text_secondary">#5C6B65</color>
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Keep original generated names available for any existing resources. -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#146B52</color>
+    <color name="purple_700">#0B4D3B</color>
+    <color name="teal_200">#66C5A5</color>
+    <color name="teal_700">#197A55</color>
 </resources>
