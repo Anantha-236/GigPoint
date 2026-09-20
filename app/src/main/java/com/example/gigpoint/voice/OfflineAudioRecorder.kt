@@ -4,77 +4,150 @@ import android.annotation.SuppressLint
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import kotlin.math.abs
+import android.media.audiofx.AcousticEchoCanceler
+import android.media.audiofx.NoiseSuppressor
 import kotlin.math.max
 
 class OfflineAudioRecorder {
 
     companion object {
-        const val SAMPLE_RATE = 16_000
 
-        // Keep voice commands short. This limits RAM usage, CPU time,
-        // accidental background recording and Whisper latency.
-        private const val MAX_SECONDS = 10
+        const val SAMPLE_RATE =
+            16_000
+
+        /**
+         * Short push-to-talk commands are safer and significantly
+         * easier for offline Whisper to understand in a shop.
+         */
+        private const val
+            MAX_SECONDS =
+            12
     }
 
-    private val lock = Any()
+    private val lock =
+        Any()
 
     @Volatile
-    private var recording = false
+    private var recording =
+        false
 
-    private var audioRecord: AudioRecord? = null
-    private var worker: Thread? = null
+    private var audioRecord:
+        AudioRecord? =
+        null
+
+    private var worker:
+        Thread? =
+        null
+
+    private var noiseSuppressor:
+        NoiseSuppressor? =
+        null
+
+    private var echoCanceler:
+        AcousticEchoCanceler? =
+        null
 
     private val samples =
         ArrayList<Short>(
-            SAMPLE_RATE * 4
+            SAMPLE_RATE *
+                5
         )
 
-    @SuppressLint("MissingPermission")
+    @SuppressLint(
+        "MissingPermission"
+    )
     fun start() {
-        if (recording) {
+
+        if (
+            recording
+        ) {
             return
         }
 
         val minBuffer =
-            AudioRecord.getMinBufferSize(
-                SAMPLE_RATE,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT
-            )
+            AudioRecord
+                .getMinBufferSize(
+                    SAMPLE_RATE,
+                    AudioFormat
+                        .CHANNEL_IN_MONO,
+                    AudioFormat
+                        .ENCODING_PCM_16BIT
+                )
 
-        check(minBuffer > 0) {
+        check(
+            minBuffer >
+                0
+        ) {
             "AudioRecord configuration is not supported."
         }
 
+        /**
+         * VOICE_RECOGNITION requests an Android capture path tuned for
+         * speech recognition. Device vendors may already enable some
+         * preprocessing for this source.
+         */
         val recorder =
             AudioRecord(
-                MediaRecorder.AudioSource.VOICE_RECOGNITION,
+                MediaRecorder
+                    .AudioSource
+                    .VOICE_RECOGNITION,
+
                 SAMPLE_RATE,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
+
+                AudioFormat
+                    .CHANNEL_IN_MONO,
+
+                AudioFormat
+                    .ENCODING_PCM_16BIT,
+
                 max(
-                    minBuffer,
+                    minBuffer *
+                        2,
                     SAMPLE_RATE
                 )
             )
 
         check(
             recorder.state ==
-                AudioRecord.STATE_INITIALIZED
+                AudioRecord
+                    .STATE_INITIALIZED
         ) {
+
             recorder.release()
+
             "Could not initialize microphone."
         }
 
-        synchronized(lock) {
+        attachAudioEffects(
+            recorder
+        )
+
+        synchronized(
+            lock
+        ) {
             samples.clear()
         }
 
-        audioRecord = recorder
-        recording = true
+        audioRecord =
+            recorder
 
-        recorder.startRecording()
+        recording =
+            true
+
+        recorder
+            .startRecording()
+
+        check(
+            recorder.recordingState ==
+                AudioRecord
+                    .RECORDSTATE_RECORDING
+        ) {
+            releaseEffects()
+            recorder.release()
+            audioRecord = null
+            recording = false
+            "The microphone did not start recording."
+        }
 
         worker =
             Thread(
@@ -83,7 +156,8 @@ class OfflineAudioRecorder {
                         ShortArray(
                             max(
                                 1024,
-                                minBuffer / 2
+                                minBuffer /
+                                    2
                             )
                         )
 
@@ -91,7 +165,10 @@ class OfflineAudioRecorder {
                         SAMPLE_RATE *
                             MAX_SECONDS
 
-                    while (recording) {
+                    while (
+                        recording
+                    ) {
+
                         val read =
                             recorder.read(
                                 buffer,
@@ -99,18 +176,31 @@ class OfflineAudioRecorder {
                                 buffer.size
                             )
 
-                        if (read <= 0) {
+                        if (
+                            read <=
+                            0
+                        ) {
                             continue
                         }
 
-                        synchronized(lock) {
+                        synchronized(
+                            lock
+                        ) {
+
                             val remaining =
                                 maxSamples -
                                     samples.size
 
-                            if (remaining <= 0) {
-                                recording = false
+                            if (
+                                remaining <=
+                                0
+                            ) {
+
+                                recording =
+                                    false
+
                             } else {
+
                                 val amount =
                                     minOf(
                                         read,
@@ -118,8 +208,10 @@ class OfflineAudioRecorder {
                                     )
 
                                 for (
-                                    i in 0 until amount
+                                    i in 0
+                                        until amount
                                 ) {
+
                                     samples.add(
                                         buffer[i]
                                     )
@@ -129,25 +221,41 @@ class OfflineAudioRecorder {
                                     samples.size >=
                                     maxSamples
                                 ) {
-                                    recording = false
+
+                                    recording =
+                                        false
                                 }
                             }
                         }
                     }
                 },
+
                 "DhwaniVoiceRecorder"
-            ).apply {
-                start()
-            }
+            )
+                .apply {
+                    start()
+                }
     }
 
-    fun stop(): FloatArray {
-        recording = false
+    fun stop():
+        FloatArray {
+
+        recording =
+            false
 
         try {
-            worker?.join(1_000)
-        } catch (_: InterruptedException) {
-            Thread.currentThread()
+
+            worker
+                ?.join(
+                    1_200
+                )
+
+        } catch (
+            _: InterruptedException
+        ) {
+
+            Thread
+                .currentThread()
                 .interrupt()
         }
 
@@ -155,58 +263,201 @@ class OfflineAudioRecorder {
             audioRecord
 
         try {
+
             if (
-                recorder?.recordingState ==
-                AudioRecord.RECORDSTATE_RECORDING
+                recorder
+                    ?.recordingState ==
+                AudioRecord
+                    .RECORDSTATE_RECORDING
             ) {
+
                 recorder.stop()
             }
-        } catch (_: IllegalStateException) {
+
+        } catch (
+            _: IllegalStateException
+        ) {
         }
 
-        recorder?.release()
+        releaseEffects()
 
-        audioRecord = null
-        worker = null
+        recorder
+            ?.release()
+
+        audioRecord =
+            null
+
+        worker =
+            null
 
         val copy =
-            synchronized(lock) {
-                samples.toShortArray()
+            synchronized(
+                lock
+            ) {
+                samples
+                    .toShortArray()
             }
 
-        return FloatArray(copy.size) {
-            index ->
-            copy[index] / 32768.0f
-        }
+        val raw =
+            FloatArray(
+                copy.size
+            ) {
+                    index ->
+
+                copy[index] /
+                    32768.0f
+            }
+
+        return VoiceAudioProcessor
+            .process(
+                raw,
+                SAMPLE_RATE
+            )
     }
 
-    fun isRecording(): Boolean =
+    fun isRecording():
+        Boolean =
         recording
 
     fun looksLikeUsefulAudio(
         data: FloatArray
     ): Boolean {
 
-        // Reject very short captures.
+        val metrics =
+            VoiceAudioProcessor
+                .analyze(
+                    data,
+                    SAMPLE_RATE
+                )
+
         if (
-            data.size <
-            SAMPLE_RATE / 2
+            metrics.durationSeconds <
+            0.55f
         ) {
             return false
         }
 
-        var peak = 0f
-
-        for (sample in data) {
-            peak =
-                maxOf(
-                    peak,
-                    abs(sample)
-                )
+        if (
+            metrics.peak <
+            0.020f
+        ) {
+            return false
         }
 
-        // Simple silence guard. This is intentionally conservative;
-        // tune it after testing on actual shop devices.
-        return peak >= 0.01f
+        if (
+            metrics.rms <
+            0.006f
+        ) {
+            return false
+        }
+
+        if (
+            metrics.voicedFrameRatio <
+            0.06f
+        ) {
+            return false
+        }
+
+        // Very high clipping usually means the mic is overloaded,
+        // rubbing against something, or being hit by a strong impulse.
+        if (
+            metrics.clippingRatio >
+            0.08f
+        ) {
+            return false
+        }
+
+        return true
+    }
+
+    private fun attachAudioEffects(
+        recorder: AudioRecord
+    ) {
+
+        val sessionId =
+            recorder
+                .audioSessionId
+
+        if (
+            NoiseSuppressor
+                .isAvailable()
+        ) {
+
+            try {
+
+                noiseSuppressor =
+                    NoiseSuppressor
+                        .create(
+                            sessionId
+                        )
+                        ?.apply {
+                            enabled =
+                                true
+                        }
+
+            } catch (
+                _: Throwable
+            ) {
+
+                noiseSuppressor =
+                    null
+            }
+        }
+
+        /**
+         * AEC is primarily for removing audio coming from the device
+         * speaker (for example DhwaniMitra TTS) from the microphone.
+         * It is not a general wind-noise remover.
+         */
+        if (
+            AcousticEchoCanceler
+                .isAvailable()
+        ) {
+
+            try {
+
+                echoCanceler =
+                    AcousticEchoCanceler
+                        .create(
+                            sessionId
+                        )
+                        ?.apply {
+                            enabled =
+                                true
+                        }
+
+            } catch (
+                _: Throwable
+            ) {
+
+                echoCanceler =
+                    null
+            }
+        }
+    }
+
+    private fun releaseEffects() {
+
+        try {
+            noiseSuppressor
+                ?.release()
+        } catch (
+            _: Throwable
+        ) {
+        }
+
+        try {
+            echoCanceler
+                ?.release()
+        } catch (
+            _: Throwable
+        ) {
+        }
+
+        noiseSuppressor =
+            null
+
+        echoCanceler =
+            null
     }
 }

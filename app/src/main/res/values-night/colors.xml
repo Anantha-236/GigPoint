@@ -1,26 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#6FD3A9</color>
-    <color name="primary_dark">#54BE94</color>
-    <color name="primary_soft">#193C31</color>
-
-    <color name="success">#6FD3A9</color>
-    <color name="warning">#FFC36A</color>
-    <color name="warning_soft">#3D321C</color>
-    <color name="danger">#FF8A84</color>
-
-    <color name="bg_screen">#101512</color>
-    <color name="card_bg">#19211D</color>
-    <color name="outline">#334039</color>
-    <color name="text_primary">#F0F5F2</color>
-    <color name="text_secondary">#B5C2BC</color>
-
-    <color name="black">#FF000000</color>
+    <color name="primary">#5DD99B</color>
+    <color name="primary_dark">#45C486</color>
+    <color name="primary_deep">#32A972</color>
+    <color name="primary_soft">#183D2D</color>
+    <color name="primary_soft_2">#142A21</color>
+    <color name="success">#5DD99B</color>
+    <color name="success_soft">#193D2E</color>
+    <color name="warning">#F2B85A</color>
+    <color name="warning_soft">#3A3020</color>
+    <color name="danger">#FF8585</color>
+    <color name="danger_soft">#402525</color>
+    <color name="info">#77B4F1</color>
+    <color name="info_soft">#1F3144</color>
+    <color name="bg_screen">#0D1511</color>
+    <color name="card_bg">#17221C</color>
+    <color name="surface_secondary">#202D26</color>
+    <color name="surface_green">#173126</color>
+    <color name="outline">#314139</color>
+    <color name="outline_strong">#43564C</color>
+    <color name="text_primary">#F2F7F4</color>
+    <color name="text_secondary">#B1BFB7</color>
+    <color name="text_muted">#829189</color>
     <color name="white">#FFFFFFFF</color>
-
-    <color name="purple_200">#6FD3A9</color>
-    <color name="purple_500">#6FD3A9</color>
-    <color name="purple_700">#54BE94</color>
-    <color name="teal_200">#6FD3A9</color>
-    <color name="teal_700">#54BE94</color>
+    <color name="white_80">#CCFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="purple_200">#5DD99B</color>
+    <color name="purple_500">#5DD99B</color>
+    <color name="purple_700">#45C486</color>
+    <color name="teal_200">#5DD99B</color>
+    <color name="teal_700">#45C486</color>
 </resources>

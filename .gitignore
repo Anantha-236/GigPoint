@@ -1,19 +1,97 @@
+# =========================================================
+# DhwaniMitra / Android project ignore rules
+# =========================================================
+
+# ---------------------------------------------------------
+# Android Studio / IntelliJ
+# ---------------------------------------------------------
+
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+
+
+# ---------------------------------------------------------
+# Gradle / Android generated files
+# ---------------------------------------------------------
+
+.gradle/
+**/build/
+build/
+
+captures/
+
+.externalNativeBuild/
+**/.externalNativeBuild/
+
+.cxx/
+**/.cxx/
+
 local.properties
 
-# Node.js dependencies
+# ---------------------------------------------------------
+# Signing / certificates / secrets
+# ---------------------------------------------------------
+
+.env
+.env.*
+
+*.jks
+*.keystore
+*.pem
+*.p12
+
+google-services.json
+
+# ---------------------------------------------------------
+# Node.js / backend generated dependencies
+# ---------------------------------------------------------
+
 node_modules/
 **/node_modules/
+
+# ---------------------------------------------------------
+# Supabase generated local state
+# ---------------------------------------------------------
+
+**/supabase/.temp/
+**/supabase/.branches/
+
+# ---------------------------------------------------------
+# Temporary audit / testing evidence
+# ---------------------------------------------------------
+
+
+# ---------------------------------------------------------
+# OS files
+# ---------------------------------------------------------
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------------------------------------------------------
+# Logs / temp files
+# ---------------------------------------------------------
+
+*.log
+*.tmp
+*.temp
+
+# =========================================================
+# IMPORTANT — DO NOT IGNORE
+#
+# These are application source and should remain tracked:
+#
+# app/src/main/assets/models/
+# app/src/main/assets/products/
+# app/src/main/assets/ui/
+# app/src/main/assets/branding/
+#
+# Backend/supabase/migrations/
+# Backend/supabase/functions/
+# Backend/supabase/config.toml
+# =========================================================
+# Local IDE/generated files
+.idea/
+audit-*/
+project-architecture.txt
+app/src/main/assets/ProductPreview.png

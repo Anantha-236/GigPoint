@@ -1,5 +1,7 @@
 package com.example.gigpoint
 
+import com.example.gigpoint.data.DatabaseHelper
+
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

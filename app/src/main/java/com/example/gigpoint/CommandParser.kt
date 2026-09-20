@@ -1,5 +1,7 @@
 package com.example.gigpoint
 
+import com.example.gigpoint.domain.Product
+
 import java.util.Locale
 
 class CommandParser {

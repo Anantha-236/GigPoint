@@ -1,5 +1,7 @@
 package com.example.gigpoint
 
+import com.example.gigpoint.data.DatabaseHelper
+
 import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
@@ -141,6 +143,7 @@ class SupabaseRestClient(private val context: Context) {
             gstin = row.optString("gstin").takeIf { it.isNotBlank() },
             businessType = row.optString("business_type"),
             city = row.optString("city").takeIf { it.isNotBlank() },
+            area = row.optString("area").takeIf { it.isNotBlank() },
             syncStatus = DatabaseHelper.SYNC_SYNCED
         )
     }

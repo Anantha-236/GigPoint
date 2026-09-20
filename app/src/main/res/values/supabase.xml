@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--
-      With:
-        adb reverse tcp:55321 tcp:55321
-      a physical Android device can reach your PC's local Supabase API
-      using 127.0.0.1:55321.
-
-      Replace the key below with the local anon/publishable key shown by:
-        npx supabase status
-
-      Never place a service-role/secret key in Android.
-    -->
     <string name="supabase_url" translatable="false">http://127.0.0.1:55321</string>
-    <string name="supabase_publishable_key" translatable="false">YOUR_LOCAL_ANON_OR_PUBLISHABLE_KEY</string>
+    <string name="supabase_publishable_key" translatable="false">sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH</string>
 </resources>

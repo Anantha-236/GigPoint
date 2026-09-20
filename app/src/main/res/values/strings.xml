@@ -1,3 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">DhwaniMitra</string>
+    <string name="login_subtitle">Your voice. Your business. Your companion.</string>
+    <string name="welcome_back">Welcome back</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="login">Login</string>
+    <string name="create_account">New here? Create account</string>
+    <string name="create_account_title">Create account</string>
+    <string name="already_have_account">Already have an account? Login</string>
+    <string name="tell_us_business">Set up your business</string>
+    <string name="owner_name">Owner name</string>
+    <string name="shop_name">Shop / business name</string>
+    <string name="gstin_optional">GSTIN (optional)</string>
+    <string name="business_type">Business type</string>
+    <string name="preferred_language">Preferred language</string>
+    <string name="appearance">Appearance</string>
+    <string name="continue_to_dhwani_mitra">Continue to DhwaniMitra</string>
+    <string name="start">Start</string>
 </resources>

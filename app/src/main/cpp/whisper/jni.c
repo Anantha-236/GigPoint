@@ -15,15 +15,27 @@ static size_t asset_read(
         void *output,
         size_t read_size
 ) {
-    return AAsset_read((AAsset *) ctx, output, read_size);
+    return AAsset_read(
+            (AAsset *) ctx,
+            output,
+            read_size
+    );
 }
 
-static bool asset_eof(void *ctx) {
-    return AAsset_getRemainingLength64((AAsset *) ctx) <= 0;
+static bool asset_eof(
+        void *ctx
+) {
+    return AAsset_getRemainingLength64(
+            (AAsset *) ctx
+    ) <= 0;
 }
 
-static void asset_close(void *ctx) {
-    AAsset_close((AAsset *) ctx);
+static void asset_close(
+        void *ctx
+) {
+    AAsset_close(
+            (AAsset *) ctx
+    );
 }
 
 static struct whisper_context *init_from_asset(
@@ -31,14 +43,22 @@ static struct whisper_context *init_from_asset(
         jobject asset_manager_java,
         const char *asset_path
 ) {
+
     AAssetManager *asset_manager =
             AAssetManager_fromJava(
                     env,
                     asset_manager_java
             );
 
-    if (asset_manager == NULL) {
-        LOGE("Could not obtain Android AssetManager");
+    if (
+        asset_manager ==
+        NULL
+    ) {
+
+        LOGE(
+                "Could not obtain Android AssetManager"
+        );
+
         return NULL;
     }
 
@@ -49,8 +69,16 @@ static struct whisper_context *init_from_asset(
                     AASSET_MODE_STREAMING
             );
 
-    if (asset == NULL) {
-        LOGE("Could not open model asset: %s", asset_path);
+    if (
+        asset ==
+        NULL
+    ) {
+
+        LOGE(
+                "Could not open model asset: %s",
+                asset_path
+        );
+
         return NULL;
     }
 
@@ -74,6 +102,7 @@ Java_com_example_gigpoint_voice_WhisperNative_initContextFromAsset(
         jobject asset_manager,
         jstring asset_path
 ) {
+
     (void) thiz;
 
     const char *path =
@@ -105,14 +134,22 @@ Java_com_example_gigpoint_voice_WhisperNative_freeContext(
         jobject thiz,
         jlong context_ptr
 ) {
+
     (void) env;
     (void) thiz;
 
     struct whisper_context *ctx =
-            (struct whisper_context *) context_ptr;
+            (struct whisper_context *)
+            context_ptr;
 
-    if (ctx != NULL) {
-        whisper_free(ctx);
+    if (
+        ctx !=
+        NULL
+    ) {
+
+        whisper_free(
+                ctx
+        );
     }
 }
 
@@ -123,14 +160,20 @@ Java_com_example_gigpoint_voice_WhisperNative_fullTranscribe(
         jlong context_ptr,
         jint num_threads,
         jfloatArray audio_data,
-        jstring language
+        jstring language,
+        jstring initial_prompt
 ) {
+
     (void) thiz;
 
     struct whisper_context *ctx =
-            (struct whisper_context *) context_ptr;
+            (struct whisper_context *)
+            context_ptr;
 
-    if (ctx == NULL) {
+    if (
+        ctx ==
+        NULL
+    ) {
         return -10;
     }
 
@@ -154,38 +197,107 @@ Java_com_example_gigpoint_voice_WhisperNative_fullTranscribe(
                     NULL
             );
 
+    const char *prompt_chars =
+            NULL;
+
+    if (
+        initial_prompt !=
+        NULL
+    ) {
+
+        prompt_chars =
+                (*env)->GetStringUTFChars(
+                        env,
+                        initial_prompt,
+                        NULL
+                );
+    }
+
     struct whisper_full_params params =
             whisper_full_default_params(
                     WHISPER_SAMPLING_GREEDY
             );
 
-    params.print_realtime = false;
-    params.print_progress = false;
-    params.print_timestamps = false;
-    params.print_special = false;
+    params.print_realtime =
+            false;
 
-    params.translate = false;
+    params.print_progress =
+            false;
 
-    // "en", "te", "hi", or "auto"
-    params.language = language_chars;
+    params.print_timestamps =
+            false;
+
+    params.print_special =
+            false;
+
+    params.translate =
+            false;
+
+    /**
+     * IMPORTANT:
+     *
+     * "auto" is a valid language value and makes Whisper choose the
+     * primary spoken language automatically.
+     *
+     * detect_language=true has a different purpose in whisper.cpp:
+     * it is used by the explicit "detect language" operation. Enabling
+     * it here can stop the normal full-transcription workflow.
+     *
+     * Therefore DhwaniMitra keeps detect_language=false and passes
+     * language="auto" for normal multilingual transcription.
+     */
+    params.language =
+            language_chars;
+
     params.detect_language =
-            strcmp(language_chars, "auto") == 0;
+            false;
 
-    params.n_threads = num_threads;
+    params.n_threads =
+            num_threads;
 
-    // Each merchant command should be treated independently.
-    params.no_context = true;
-    params.single_segment = true;
+    // Merchant commands are independent short utterances.
+    params.no_context =
+            true;
 
-    whisper_reset_timings(ctx);
+    params.single_segment =
+            true;
 
-    int result =
+    if (
+        prompt_chars !=
+        NULL &&
+        strlen(
+                prompt_chars
+        ) >
+        0
+    ) {
+
+        params.initial_prompt =
+                prompt_chars;
+    }
+
+    whisper_reset_timings(
+            ctx
+    );
+
+    const int result =
             whisper_full(
                     ctx,
                     params,
                     samples,
                     sample_count
             );
+
+    if (
+        prompt_chars !=
+        NULL
+    ) {
+
+        (*env)->ReleaseStringUTFChars(
+                env,
+                initial_prompt,
+                prompt_chars
+        );
+    }
 
     (*env)->ReleaseStringUTFChars(
             env,
@@ -209,17 +321,24 @@ Java_com_example_gigpoint_voice_WhisperNative_getSegmentCount(
         jobject thiz,
         jlong context_ptr
 ) {
+
     (void) env;
     (void) thiz;
 
     struct whisper_context *ctx =
-            (struct whisper_context *) context_ptr;
+            (struct whisper_context *)
+            context_ptr;
 
-    if (ctx == NULL) {
+    if (
+        ctx ==
+        NULL
+    ) {
         return 0;
     }
 
-    return whisper_full_n_segments(ctx);
+    return whisper_full_n_segments(
+            ctx
+    );
 }
 
 JNIEXPORT jstring JNICALL
@@ -229,13 +348,22 @@ Java_com_example_gigpoint_voice_WhisperNative_getSegmentText(
         jlong context_ptr,
         jint index
 ) {
+
     (void) thiz;
 
     struct whisper_context *ctx =
-            (struct whisper_context *) context_ptr;
+            (struct whisper_context *)
+            context_ptr;
 
-    if (ctx == NULL) {
-        return (*env)->NewStringUTF(env, "");
+    if (
+        ctx ==
+        NULL
+    ) {
+
+        return (*env)->NewStringUTF(
+                env,
+                ""
+        );
     }
 
     const char *text =
@@ -246,6 +374,61 @@ Java_com_example_gigpoint_voice_WhisperNative_getSegmentText(
 
     return (*env)->NewStringUTF(
             env,
-            text != NULL ? text : ""
+            text != NULL
+                ? text
+                : ""
+    );
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_example_gigpoint_voice_WhisperNative_getDetectedLanguage(
+        JNIEnv *env,
+        jobject thiz,
+        jlong context_ptr
+) {
+
+    (void) thiz;
+
+    struct whisper_context *ctx =
+            (struct whisper_context *)
+            context_ptr;
+
+    if (
+        ctx ==
+        NULL
+    ) {
+
+        return (*env)->NewStringUTF(
+                env,
+                ""
+        );
+    }
+
+    const int language_id =
+            whisper_full_lang_id(
+                    ctx
+            );
+
+    if (
+        language_id <
+        0
+    ) {
+
+        return (*env)->NewStringUTF(
+                env,
+                ""
+        );
+    }
+
+    const char *language =
+            whisper_lang_str(
+                    language_id
+            );
+
+    return (*env)->NewStringUTF(
+            env,
+            language != NULL
+                ? language
+                : ""
     );
 }

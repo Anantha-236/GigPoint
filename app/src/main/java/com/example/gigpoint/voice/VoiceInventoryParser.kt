@@ -2,7 +2,7 @@ package com.example.gigpoint.voice
 
 import com.example.gigpoint.CommandIntent
 import com.example.gigpoint.CommandParser
-import com.example.gigpoint.Product
+import com.example.gigpoint.domain.Product
 import java.util.Locale
 
 /**

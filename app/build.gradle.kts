@@ -11,42 +11,64 @@ android {
 
     defaultConfig {
         applicationId = "com.example.gigpoint"
+
         minSdk = 24
         targetSdk = 37
+
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner =
             "androidx.test.runner.AndroidJUnitRunner"
 
-        // Start with modern physical Android devices only.
-        // This keeps native output smaller and matches Wi-Fi-debug testing.
+        /*
+         * DhwaniMitra currently targets modern
+         * 64-bit Android devices.
+         *
+         * This reduces APK size because we only
+         * package ARM64 Whisper/GGML libraries.
+         */
         ndk {
             abiFilters += listOf(
                 "arm64-v8a"
             )
         }
 
+        /*
+         * Whisper should always be compiled
+         * using optimized native code.
+         */
         externalNativeBuild {
             cmake {
-                arguments +=
-                    "-DCMAKE_BUILD_TYPE=Release"
+                arguments += listOf(
+                    "-DCMAKE_BUILD_TYPE=Release",
+                    "-DGGML_OPENMP=OFF"
+                )
             }
         }
     }
 
     buildTypes {
+
         debug {
-            // An unoptimized native Whisper build is dramatically slower.
+
+            /*
+             * Keep Whisper/GGML optimized even
+             * while the Android application itself
+             * is a debug build.
+             */
             externalNativeBuild {
                 cmake {
-                    arguments +=
-                        "-DCMAKE_BUILD_TYPE=Release"
+                    arguments += listOf(
+                        "-DCMAKE_BUILD_TYPE=Release",
+                        "-DGGML_OPENMP=OFF"
+                    )
                 }
             }
         }
 
         release {
+
             optimization {
                 enable = false
             }
@@ -61,8 +83,14 @@ android {
             JavaVersion.VERSION_11
     }
 
-    // Same NDK revision used by the official whisper.cpp Android example.
-    ndkVersion = "25.2.9519653"
+    /*
+     * NDK r28+ generates 16 KB aligned
+     * native libraries by default.
+     *
+     * Required for modern Android devices
+     * and Google Play 16 KB page-size support.
+     */
+    ndkVersion = "28.2.13676358"
 
     externalNativeBuild {
         cmake {
@@ -75,11 +103,22 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.material)
 
-    testImplementation(libs.junit)
+    implementation(
+        libs.androidx.appcompat
+    )
+
+    implementation(
+        libs.androidx.core.ktx
+    )
+
+    implementation(
+        libs.material
+    )
+
+    testImplementation(
+        libs.junit
+    )
 
     androidTestImplementation(
         libs.androidx.espresso.core

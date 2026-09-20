@@ -1,6 +1,6 @@
 package com.example.gigpoint.voice
 
-import com.example.gigpoint.Product
+import com.example.gigpoint.domain.Product
 
 enum class VoiceInventoryAction {
     STOCK_IN,

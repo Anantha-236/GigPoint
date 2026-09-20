@@ -1,11 +1,15 @@
 package com.example.gigpoint
 
+import com.example.gigpoint.data.DatabaseHelper
+import com.example.gigpoint.domain.Product
+
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.speech.tts.TextToSpeech
 import android.os.Bundle
 import android.text.InputType
+import android.widget.ImageView
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -30,7 +34,7 @@ import java.util.concurrent.Executors
 import com.example.gigpoint.voice.OfflineAudioRecorder
 import com.example.gigpoint.voice.WhisperEngine
 import com.example.gigpoint.voice.VoiceConversationManager
-import com.example.gigpoint.voice.VoiceActionExecutor
+import com.example.gigpoint.actions.VoiceActionExecutor
 import com.example.gigpoint.voice.VoiceTurn
 
 class MainActivity : AppCompatActivity() {
@@ -133,6 +137,13 @@ class MainActivity : AppCompatActivity() {
             ).joinToString(" • ")
 
         bindViews()
+
+        setupModernHeader(
+            profile?.ownerName,
+            shop?.shopName
+        )
+
+        setupBottomNavigation()
 
         audioRecorder =
             OfflineAudioRecorder()
@@ -273,6 +284,127 @@ class MainActivity : AppCompatActivity() {
             findViewById(R.id.switchInternet)
         btnSync =
             findViewById(R.id.btnSync)
+    }
+
+    private fun setupModernHeader(
+        ownerName: String?,
+        shopName: String?
+    ) {
+        val cleanOwner =
+            ownerName
+                ?.trim()
+                ?.takeIf {
+                    it.isNotBlank()
+                }
+
+        val cleanShop =
+            shopName
+                ?.trim()
+                ?.takeIf {
+                    it.isNotBlank()
+                }
+
+        findViewById<TextView>(
+            R.id.tvGreeting
+        ).text =
+            cleanOwner
+                ?.let {
+                    "Welcome, $it"
+                }
+                ?: "Welcome to DhwaniMitra"
+
+        findViewById<TextView>(
+            R.id.tvShopName
+        ).text =
+            cleanShop
+                ?: "Your shop companion"
+
+        val accountButton =
+            findViewById<TextView>(
+                R.id.btnAccount
+            )
+
+        accountButton.text =
+            cleanOwner
+                ?.firstOrNull()
+                ?.uppercaseChar()
+                ?.toString()
+                ?: "M"
+
+        accountButton.setOnClickListener {
+            openAccount()
+        }
+    }
+
+    private fun setupBottomNavigation() {
+        val rootScroll =
+            findViewById<android.widget.ScrollView>(
+                R.id.rootScroll
+            )
+
+        fun scrollToView(
+            viewId: Int
+        ) {
+            val target =
+                findViewById<View>(
+                    viewId
+                )
+
+            rootScroll.post {
+                rootScroll.smoothScrollTo(
+                    0,
+                    target.top
+                )
+            }
+        }
+
+        findViewById<View>(
+            R.id.btnNavHome
+        ).setOnClickListener {
+            rootScroll.smoothScrollTo(
+                0,
+                0
+            )
+        }
+
+        findViewById<View>(
+            R.id.btnNavInventory
+        ).setOnClickListener {
+            scrollToView(
+                R.id.sectionInventory
+            )
+        }
+
+        findViewById<View>(
+            R.id.btnNavVoice
+        ).setOnClickListener {
+            scrollToView(
+                R.id.sectionVoice
+            )
+        }
+
+        findViewById<View>(
+            R.id.btnNavAlerts
+        ).setOnClickListener {
+            scrollToView(
+                R.id.sectionAlerts
+            )
+        }
+
+        findViewById<View>(
+            R.id.btnNavMore
+        ).setOnClickListener {
+            openAccount()
+        }
+    }
+
+    private fun openAccount() {
+        startActivity(
+            Intent(
+                this,
+                AccountActivity::class.java
+            )
+        )
     }
 
     private fun setupLanguageSelector(
@@ -503,6 +635,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun startVoiceRecording() {
         try {
+            // Prevent DhwaniMitra's own TTS from being captured as user speech.
+            tts?.stop()
+
             audioRecorder.start()
             voiceRecording = true
 
@@ -550,28 +685,51 @@ class MainActivity : AppCompatActivity() {
         tvVoiceResult.text =
             "Understanding your command offline…"
 
+        // Voice recognition is independent from the UI/TTS language.
+        // Auto mode is required for English + Telugu + Hindi code-switching.
         val language =
-            when (
-                languageSpinner.selectedItem
-                    .toString()
-            ) {
-                "Telugu" -> "te"
-                "Hindi" -> "hi"
-                else -> "en"
-            }
+            "auto"
+
+        val inventoryPrompt =
+            whisperEngine
+                .buildInventoryPrompt(
+                    db.getProducts()
+                        .map {
+                            it.name
+                        }
+                )
 
         voiceWorker.execute {
             try {
                 val transcript =
                     whisperEngine.transcribe(
                         audio,
-                        language
+                        language,
+                        inventoryPrompt
                     )
+
+                val detectedLanguage =
+                    whisperEngine
+                        .detectedLanguage()
 
                 runOnUiThread {
                     etCommand.setText(
                         transcript
                     )
+
+                    val detectedLabel =
+                        when (
+                            detectedLanguage
+                        ) {
+                            "te" -> "Telugu"
+                            "hi" -> "Hindi"
+                            "en" -> "English"
+                            "" -> "Unknown"
+                            else -> detectedLanguage
+                        }
+
+                    tvLanguageHelp.text =
+                        "Voice recognition: Auto / Mixed • primary detected language: $detectedLabel"
 
                     handleVoiceTranscript(
                         transcript
@@ -1168,6 +1326,24 @@ class MainActivity : AppCompatActivity() {
                     R.layout.item_product,
                     inventoryContainer,
                     false
+                )
+
+            val productImage =
+                row.findViewById<ImageView>(
+                    R.id.ivItemProductImage
+                )
+
+            val productAssetName =
+                ProductImageMapper
+                    .getAssetName(
+                        product.name
+                    )
+
+            AssetImageLoader
+                .loadProduct(
+                    context = this,
+                    imageView = productImage,
+                    assetName = productAssetName
                 )
 
             row.findViewById<TextView>(

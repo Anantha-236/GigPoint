@@ -1,510 +1,591 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/rootScroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_screen"
-    android:clipToPadding="false"
-    android:fillViewport="true"
-    android:fitsSystemWindows="true">
+    android:orientation="vertical">
 
-    <LinearLayout
+    <ScrollView
+        android:id="@+id/rootScroll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingStart="16dp"
-        android:paddingTop="18dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="32dp">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:fillViewport="true">
 
-        <!-- Header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:paddingStart="18dp"
+            android:paddingTop="18dp"
+            android:paddingEnd="18dp"
+            android:paddingBottom="32dp">
 
+            <!-- Header -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="GigPoint"
-                    android:textColor="@color/text_primary"
-                    android:textSize="28sp"
-                    android:textStyle="bold" />
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="Voice-first inventory assistant"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp" />
+                    <TextView
+                        android:id="@+id/tvGreeting"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Welcome to DhwaniMitra"
+                        android:textColor="@color/text_primary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvShopName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:text="Your shop companion"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="46dp"
+                    android:layout_height="46dp"
+                    android:layout_marginStart="10dp"
+                    app:cardBackgroundColor="@color/primary"
+                    app:cardCornerRadius="23dp"
+                    app:cardElevation="0dp">
+
+                    <TextView
+                        android:id="@+id/btnAccount"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:text="M"
+                        android:textColor="@color/white"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
             <TextView
                 android:id="@+id/tvConnectionStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_result"
-                android:paddingStart="10dp"
-                android:paddingTop="7dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="7dp"
-                android:text="Offline"
-                android:textColor="@color/warning"
+                android:layout_marginTop="12dp"
+                android:background="@color/primary_soft"
+                android:paddingStart="12dp"
+                android:paddingTop="6dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="6dp"
+                android:text="Offline ready"
+                android:textColor="@color/primary_dark"
                 android:textSize="11sp"
                 android:textStyle="bold" />
-        </LinearLayout>
 
-        <!-- Voice hero -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            app:cardBackgroundColor="@color/primary"
-            app:cardCornerRadius="22dp"
-            app:cardElevation="1dp">
-
+            <!-- Summary row 1 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="vertical"
-                android:padding="20dp">
+                android:layout_marginTop="18dp"
+                android:orientation="horizontal"
+                android:weightSum="2">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="VOICE STOCK ENTRY"
-                    android:textColor="@color/white_80"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="112dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/card_bg"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/outline"
+                    app:strokeWidth="1dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="PRODUCTS"
+                            android:textColor="@color/text_muted"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/tvProductCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="0"
+                            android:textColor="@color/primary"
+                            android:textSize="30sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Inventory items"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center"
-                    android:text="Speak naturally. GigPoint will interpret the stock update and ask you to confirm."
-                    android:textColor="@color/white"
-                    android:textSize="16sp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnVoice"
-                    android:layout_width="match_parent"
-                    android:layout_height="58dp"
-                    android:layout_marginTop="16dp"
-                    android:text="TAP TO SPEAK / TEST VOICE"
-                    android:textColor="@color/primary_dark"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="@color/white"
-                    app:cornerRadius="16dp" />
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="112dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/warning_soft"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="LOW STOCK"
+                            android:textColor="@color/warning"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/tvLowStockCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="0"
+                            android:textColor="@color/warning"
+                            android:textSize="30sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Need refill"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-        <!-- Language -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:cardBackgroundColor="@color/card_bg"
-            app:cardCornerRadius="16dp"
-            app:strokeColor="@color/outline"
-            app:strokeWidth="1dp">
-
+            <!-- Summary row 2 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="14dp">
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal"
+                android:weightSum="2">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Preferred language"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="96dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/danger_soft"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+                        <TextView
+                            android:id="@+id/tvOutOfStockCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="@color/danger"
+                            android:textSize="25sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Out of stock"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                <Spinner
-                    android:id="@+id/languageSpinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="2dp" />
-
-                <TextView
-                    android:id="@+id/tvLanguageHelp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp" />
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="96dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/info_soft"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+                        <TextView
+                            android:id="@+id/tvPendingCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="@color/info"
+                            android:textSize="25sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Waiting to sync"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-        <!-- Summary grid row 1 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
+            <!-- Voice -->
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
-                android:layout_height="104dp"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1"
-                app:cardBackgroundColor="@color/card_bg"
-                app:cardCornerRadius="16dp"
-                app:strokeColor="@color/outline"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:id="@+id/tvProductCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="@color/primary"
-                        android:textSize="30sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Products"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
-                android:layout_height="104dp"
-                android:layout_marginStart="6dp"
-                android:layout_weight="1"
-                app:cardBackgroundColor="@color/warning_soft"
-                app:cardCornerRadius="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:id="@+id/tvLowStockCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="@color/warning"
-                        android:textSize="30sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Low stock"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
-
-        <!-- Summary grid row 2 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
-                android:layout_height="104dp"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1"
-                app:cardBackgroundColor="@color/danger_soft"
-                app:cardCornerRadius="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:id="@+id/tvOutOfStockCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="@color/danger"
-                        android:textSize="30sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Out of stock"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
-                android:layout_height="104dp"
-                android:layout_marginStart="6dp"
-                android:layout_weight="1"
-                app:cardBackgroundColor="@color/primary_soft"
-                app:cardCornerRadius="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:id="@+id/tvPendingCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="@color/primary"
-                        android:textSize="30sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Waiting backup"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
-
-        <TextView
-            style="@style/SectionTitle"
-            android:text="Quick actions" />
-
-        <!-- Quick action row 1 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnStockIn"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1"
-                android:text="Stock In"
-                android:textSize="14sp"
-                app:backgroundTint="@color/success"
-                app:cornerRadius="14dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnStockOut"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_marginStart="6dp"
-                android:layout_weight="1"
-                android:text="Stock Out"
-                android:textSize="14sp"
-                app:backgroundTint="@color/danger"
-                app:cornerRadius="14dp" />
-        </LinearLayout>
-
-        <!-- Quick action row 2 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAddProduct"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1"
-                android:text="Add Product"
-                android:textColor="@color/primary"
-                android:textSize="14sp"
-                app:cornerRadius="14dp"
-                app:strokeColor="@color/primary" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnProcessCommand"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_marginStart="6dp"
-                android:layout_weight="1"
-                android:text="Process Text"
-                android:textColor="@color/primary"
-                android:textSize="14sp"
-                app:cornerRadius="14dp"
-                app:strokeColor="@color/primary" />
-        </LinearLayout>
-
-        <!-- Manual transcript / parser testing -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:cardBackgroundColor="@color/card_bg"
-            app:cardCornerRadius="16dp"
-            app:strokeColor="@color/outline"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
+                android:id="@+id/sectionVoice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="14dp">
+                android:layout_marginTop="20dp"
+                app:cardBackgroundColor="@color/primary_deep"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="0dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Command preview"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.textfield.TextInputLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:hint="Whisper transcript / type a command"
-                    app:boxBackgroundMode="outline">
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:padding="22dp">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etCommand"
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="text"
-                        android:maxLines="3" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:gravity="center"
+                        android:text="DHWANIMITRA VOICE"
+                        android:textColor="@color/white_80"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tvVoiceResult"
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"
+                        android:text="Speak naturally"
+                        android:textColor="@color/white"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:gravity="center"
+                        android:text="English • తెలుగు • हिन्दी • Mixed speech"
+                        android:textColor="@color/white_80"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnVoice"
+                        android:layout_width="176dp"
+                        android:layout_height="64dp"
+                        android:layout_marginTop="18dp"
+                        android:text="TAP TO SPEAK"
+                        android:textColor="@color/primary_deep"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/white"
+                        app:cornerRadius="32dp" />
+
+                    <TextView
+                        android:id="@+id/tvVoiceResult"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:gravity="center"
+                        android:text="Loading offline voice assistant…"
+                        android:textColor="@color/white"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        app:boxBackgroundColor="@color/white"
+                        app:boxBackgroundMode="filled"
+                        app:boxCornerRadiusBottomEnd="14dp"
+                        app:boxCornerRadiusBottomStart="14dp"
+                        app:boxCornerRadiusTopEnd="14dp"
+                        app:boxCornerRadiusTopStart="14dp">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etCommand"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Type a test voice command"
+                            android:inputType="text"
+                            android:maxLines="2"
+                            android:textColor="@color/text_primary" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnProcessCommand"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="4dp"
+                        android:text="TEST TEXT COMMAND"
+                        android:textColor="@color/white" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Language -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                app:cardBackgroundColor="@color/card_bg"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/outline"
+                app:strokeWidth="1dp">
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/bg_result"
-                    android:padding="12dp"
-                    android:text="Interpreted command will appear here."
-                    android:textColor="@color/text_primary"
-                    android:textSize="13sp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+                    android:orientation="vertical"
+                    android:padding="15dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="App language"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                    <Spinner
+                        android:id="@+id/languageSpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp" />
+                    <TextView
+                        android:id="@+id/tvLanguageHelp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-        <TextView
-            style="@style/SectionTitle"
-            android:text="Inventory" />
-
-        <LinearLayout
-            android:id="@+id/inventoryContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-
-        <TextView
-            style="@style/SectionTitle"
-            android:text="Needs attention" />
-
-        <LinearLayout
-            android:id="@+id/alertsContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-
-        <TextView
-            style="@style/SectionTitle"
-            android:text="Offline backup" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/card_bg"
-            app:cardCornerRadius="16dp"
-            app:strokeColor="@color/outline"
-            app:strokeWidth="1dp">
+            <!-- Quick actions -->
+            <TextView
+                style="@style/SectionTitle"
+                android:text="Quick actions" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Your stock changes are saved on this phone first. When internet is available, they can be backed up to the cloud."
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
-
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switchInternet"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="Simulate internet available"
-                    android:textColor="@color/text_primary" />
-
+                android:orientation="horizontal"
+                android:weightSum="3">
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSync"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginTop="8dp"
-                    android:text="Back up pending records"
+                    android:id="@+id/btnStockIn"
+                    android:layout_width="0dp"
+                    android:layout_height="62dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    android:text="Stock In"
+                    android:textSize="12sp"
                     app:backgroundTint="@color/primary"
-                    app:cornerRadius="14dp" />
+                    app:cornerRadius="18dp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStockOut"
+                    android:layout_width="0dp"
+                    android:layout_height="62dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    android:text="Stock Out"
+                    android:textSize="12sp"
+                    app:backgroundTint="@color/danger"
+                    app:cornerRadius="18dp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAddProduct"
+                    android:layout_width="0dp"
+                    android:layout_height="62dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_weight="1"
+                    android:text="Add Item"
+                    android:textColor="@color/primary"
+                    android:textSize="12sp"
+                    app:backgroundTint="@color/primary_soft"
+                    app:cornerRadius="18dp" />
             </LinearLayout>
+
+            <!-- Inventory -->
+            <TextView
+                android:id="@+id/sectionInventory"
+                style="@style/SectionTitle"
+                android:text="Inventory" />
+            <LinearLayout
+                android:id="@+id/inventoryContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <!-- Alerts -->
+            <TextView
+                android:id="@+id/sectionAlerts"
+                style="@style/SectionTitle"
+                android:text="Needs attention" />
+            <LinearLayout
+                android:id="@+id/alertsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <!-- Offline / Sync -->
+            <TextView
+                style="@style/SectionTitle"
+                android:text="Offline &amp; backup" />
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/card_bg"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/outline"
+                app:strokeWidth="1dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Stock changes are saved on this device first and can be synchronized when the backend is available."
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchInternet"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Backend connection available"
+                        android:textColor="@color/text_primary" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSync"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:layout_marginTop="8dp"
+                        android:text="SYNC PENDING DATA"
+                        app:backgroundTint="@color/primary"
+                        app:cornerRadius="16dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Transactions -->
+            <TextView
+                android:id="@+id/sectionTransactions"
+                style="@style/SectionTitle"
+                android:text="Recent activity" />
+            <LinearLayout
+                android:id="@+id/transactionsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Bottom navigation -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="@color/card_bg"
+        android:elevation="12dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp">
+
+        <TextView
+            android:id="@+id/btnNavHome"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="HOME"
+            android:textColor="@color/primary"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/btnNavInventory"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="INVENTORY"
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginBottom="14dp"
+            app:cardBackgroundColor="@color/primary"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="8dp">
+            <TextView
+                android:id="@+id/btnNavVoice"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="VOICE"
+                android:textColor="@color/white"
+                android:textSize="9sp"
+                android:textStyle="bold" />
         </com.google.android.material.card.MaterialCardView>
 
         <TextView
-            style="@style/SectionTitle"
-            android:text="Recent transactions" />
-
-        <LinearLayout
-            android:id="@+id/transactionsContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            android:id="@+id/btnNavAlerts"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="ALERTS"
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp"
+            android:textStyle="bold" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
+            android:id="@+id/btnNavMore"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center"
-            android:text="GigPoint prototype • Offline-first inventory"
-            android:textColor="@color/text_muted"
-            android:textSize="11sp" />
-
+            android:text="MORE"
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp"
+            android:textStyle="bold" />
     </LinearLayout>
-</ScrollView>
+</LinearLayout>

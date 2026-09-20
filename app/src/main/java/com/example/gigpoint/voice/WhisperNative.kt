@@ -5,7 +5,9 @@ import android.content.res.AssetManager
 object WhisperNative {
 
     init {
-        System.loadLibrary("dhwani_whisper")
+        System.loadLibrary(
+            "dhwani_whisper"
+        )
     }
 
     external fun initContextFromAsset(
@@ -21,7 +23,8 @@ object WhisperNative {
         contextPtr: Long,
         numThreads: Int,
         audioData: FloatArray,
-        language: String
+        language: String,
+        initialPrompt: String
     ): Int
 
     external fun getSegmentCount(
@@ -31,5 +34,14 @@ object WhisperNative {
     external fun getSegmentText(
         contextPtr: Long,
         index: Int
+    ): String
+
+    /**
+     * Primary language selected by Whisper for the latest transcription.
+     * Mixed-language speech can still contain words from several languages;
+     * Whisper exposes one primary detected language for the segment/context.
+     */
+    external fun getDetectedLanguage(
+        contextPtr: Long
     ): String
 }
