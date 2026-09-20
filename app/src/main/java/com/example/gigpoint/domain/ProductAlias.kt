@@ -1,3 +1,12 @@
 package com.example.gigpoint.domain
 
-// Structure placeholder: no existing ProductAlias implementation was present to move.
+data class ProductAlias(
+    val id: Long,
+    val productId: Long,
+    val variantId: Long?,
+    val alias: String,
+    val normalizedAlias: String,
+    val language: String?,
+    val source: String,
+    val confidence: Double
+)

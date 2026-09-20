@@ -1,3 +1,9 @@
 package com.example.gigpoint.domain
 
-// Structure placeholder: no existing InventoryRecord implementation was present to move.
+data class InventoryRecord(
+    val variantId: Long,
+    val quantity: Double,
+    val reorderLevel: Double,
+    val updatedAt: Long,
+    val syncStatus: String
+)

@@ -10,5 +10,9 @@ data class StockTransaction(
     val source: String,
     val transcript: String?,
     val createdAt: Long,
-    val syncStatus: String
+    val syncStatus: String,
+    val variantId: Long? = null,
+    val commandId: String? = null,
+    val reversesTransactionId: String? = null,
+    val reversedByTransactionId: String? = null
 )

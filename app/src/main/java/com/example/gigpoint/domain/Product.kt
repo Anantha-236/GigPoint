@@ -6,5 +6,8 @@ data class Product(
     val unit: String,
     val quantity: Double,
     val minimumStock: Double,
-    val syncStatus: String
+    val syncStatus: String,
+    val brand: String? = null,
+    val category: String? = null,
+    val active: Boolean = true
 )
