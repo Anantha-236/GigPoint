@@ -1,6 +1,0 @@
-
-                    #if !defined(__ARM_FEATURE_FMA)
-                    #  error "Feature FMA is not defined"
-                    #endif
-                    int main() { return 0; }
-                    
