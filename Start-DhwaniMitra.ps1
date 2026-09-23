@@ -1,165 +1,251 @@
 param(
+    [ValidateSet("Hosted", "Local")]
+    [string]$BackendMode = "Hosted",
+
     [switch]$Build,
     [switch]$Install,
     [switch]$OpenStudio,
-    [switch]$NoFunctions,
     [switch]$NoLaunch,
     [string]$DeviceSerial = ""
 )
 
 $ErrorActionPreference = "Stop"
 
-function Write-Step($message) {
+function Step([string]$message) {
     Write-Host ""
     Write-Host "==> $message" -ForegroundColor Cyan
 }
-function Write-Ok($message) {
+
+function Ok([string]$message) {
     Write-Host "[OK] $message" -ForegroundColor Green
 }
-function Write-Warn($message) {
+
+function Warn([string]$message) {
     Write-Host "[WARN] $message" -ForegroundColor Yellow
 }
-function Write-Fail($message) {
+
+function Fail([string]$message) {
     Write-Host "[FAIL] $message" -ForegroundColor Red
+    exit 1
 }
+
 function Find-Adb {
-    $command = Get-Command adb -ErrorAction SilentlyContinue
-    if ($command) { return $command.Source }
+    $command =
+        Get-Command adb -ErrorAction SilentlyContinue
+
+    if ($command) {
+        return $command.Source
+    }
 
     $candidates = @(
         (Join-Path $env:LOCALAPPDATA "Android\Sdk\platform-tools\adb.exe"),
         (Join-Path $env:ANDROID_HOME "platform-tools\adb.exe"),
         (Join-Path $env:ANDROID_SDK_ROOT "platform-tools\adb.exe")
-    ) | Where-Object { $_ -and (Test-Path $_) }
+    ) | Where-Object {
+        $_ -and (Test-Path $_)
+    }
 
-    if ($candidates.Count -gt 0) { return $candidates[0] }
+    if ($candidates.Count -gt 0) {
+        return $candidates[0]
+    }
+
     return $null
 }
-function Test-TcpPort([string]$HostName, [int]$Port) {
-    try {
-        $client = New-Object System.Net.Sockets.TcpClient
-        $async = $client.BeginConnect($HostName, $Port, $null, $null)
-        $connected = $async.AsyncWaitHandle.WaitOne(1500, $false)
-        if ($connected -and $client.Connected) {
-            $client.EndConnect($async)
-            $client.Close()
-            return $true
-        }
-        $client.Close()
-        return $false
-    } catch {
-        return $false
+
+function Read-SupabaseXml(
+    [string]$path
+) {
+    if (-not (Test-Path $path)) {
+        Fail "Missing $path"
+    }
+
+    [xml]$xml =
+        Get-Content -LiteralPath $path
+
+    $url =
+        [string](
+            $xml.resources.string |
+            Where-Object {
+                $_.name -eq "supabase_url"
+            } |
+            Select-Object -First 1
+        ).'#text'
+
+    $key =
+        [string](
+            $xml.resources.string |
+            Where-Object {
+                $_.name -eq "supabase_publishable_key"
+            } |
+            Select-Object -First 1
+        ).'#text'
+
+    return @{
+        Url = $url.Trim().TrimEnd('/')
+        Key = $key.Trim()
     }
 }
 
-$ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$BackendRoot = Join-Path $ProjectRoot "backend"
-$SupabaseConfig = Join-Path $BackendRoot "supabase\config.toml"
-$AndroidSupabaseXml = Join-Path $ProjectRoot "app\src\main\res\values\supabase.xml"
-$Gradlew = Join-Path $ProjectRoot "gradlew.bat"
-$DebugApk = Join-Path $ProjectRoot "app\build\outputs\apk\debug\app-debug.apk"
+$projectRoot =
+    Split-Path -Parent $MyInvocation.MyCommand.Path
 
-$PackageName = "com.example.gigpoint"
-$LauncherActivity = ".LauncherActivity"
-$ApiPort = 55321
-$StudioPort = 55323
+$backendRootCandidates = @(
+    (Join-Path $projectRoot "Backend"),
+    (Join-Path $projectRoot "backend")
+)
+
+$backendRoot =
+    $backendRootCandidates |
+    Where-Object {
+        Test-Path $_
+    } |
+    Select-Object -First 1
+
+$supabaseXml =
+    Join-Path `
+        $projectRoot `
+        "app\src\main\res\values\supabase.xml"
+
+$gradlew =
+    Join-Path `
+        $projectRoot `
+        "gradlew.bat"
+
+$debugApk =
+    Join-Path `
+        $projectRoot `
+        "app\build\outputs\apk\debug\app-debug.apk"
+
+$packageName =
+    "com.example.gigpoint"
+
+$launcherActivity =
+    ".LauncherActivity"
+
+$apiPort =
+    55321
+
+$studioPort =
+    55323
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor DarkGreen
 Write-Host "       DhwaniMitra Development Launcher     " -ForegroundColor Green
 Write-Host "============================================" -ForegroundColor DarkGreen
-Write-Host "Project : $ProjectRoot"
-Write-Host "Backend : $BackendRoot"
+Write-Host "Backend mode : $BackendMode"
 
-Write-Step "Checking project structure"
-if (-not (Test-Path $BackendRoot)) {
-    Write-Fail "Backend folder not found: $BackendRoot"
-    exit 1
-}
-if (-not (Test-Path $SupabaseConfig)) {
-    Write-Fail "Supabase config not found: $SupabaseConfig"
-    exit 1
-}
-if (-not (Test-Path (Join-Path $BackendRoot "package.json"))) {
-    Write-Fail "backend\package.json is missing."
-    exit 1
-}
-if (-not (Test-Path (Join-Path $ProjectRoot "app"))) {
-    Write-Fail "Android app folder is missing."
-    exit 1
-}
-Write-Ok "Project structure looks correct."
+if ($BackendMode -eq "Hosted") {
+    Step "Checking hosted Supabase configuration"
 
-Write-Step "Checking Docker"
-$docker = Get-Command docker -ErrorAction SilentlyContinue
-if (-not $docker) {
-    Write-Fail "Docker CLI is not available. Start/install Docker Desktop first."
-    exit 1
-}
-try {
-    & docker info *> $null
-    Write-Ok "Docker daemon is running."
-} catch {
-    Write-Fail "Docker Desktop is installed but the Docker daemon is not running."
-    Write-Host "Start Docker Desktop and run this launcher again."
-    exit 1
-}
+    $config =
+        Read-SupabaseXml $supabaseXml
 
-Write-Step "Checking local Supabase backend"
-Push-Location $BackendRoot
-try {
-    $statusOutput = (& npx supabase status 2>&1 | Out-String)
-    $statusExit = $LASTEXITCODE
+    if (
+        $config.Url -notmatch '^https://' -or
+        $config.Key -notmatch '^sb_publishable_'
+    ) {
+        Fail @"
+The Android app is not configured for hosted Supabase.
+Current endpoint: $($config.Url)
 
-    if ($statusExit -ne 0 -or $statusOutput -notmatch "local development setup is running") {
-        Write-Warn "Supabase is not running. Starting it now..."
-        & npx supabase start
-        if ($LASTEXITCODE -ne 0) {
-            throw "Supabase failed to start."
-        }
-        $statusOutput = (& npx supabase status 2>&1 | Out-String)
-    } else {
-        Write-Ok "Supabase local development setup is already running."
+Run:
+  .\Configure-DhwaniMitra-Backend.ps1
+
+Then paste the Project URL and publishable key from the Supabase Connect dialog.
+"@
     }
-} finally {
-    Pop-Location
-}
 
-if (-not (Test-TcpPort "127.0.0.1" $ApiPort)) {
-    Write-Fail "Supabase API is not reachable on 127.0.0.1:$ApiPort."
-    exit 1
-}
-Write-Ok "Supabase API is reachable on port $ApiPort."
+    try {
+        $health =
+            Invoke-WebRequest `
+                -Uri "$($config.Url)/auth/v1/health" `
+                -Headers @{
+                    "apikey" = $config.Key
+                } `
+                -UseBasicParsing `
+                -TimeoutSec 15
 
-Write-Step "Reading Supabase client configuration"
-$projectUrl = $null
-$publishableKey = $null
+        if ($health.StatusCode -ne 200) {
+            Fail "Hosted Supabase health check returned HTTP $($health.StatusCode)."
+        }
+    } catch {
+        Fail "Hosted Supabase is not reachable: $($_.Exception.Message)"
+    }
 
-if ($statusOutput -match "Project URL\s+[│|]?\s*(http://[^\s│]+)") {
-    $projectUrl = $Matches[1].Trim()
+    Ok "Hosted Supabase is reachable: $($config.Url)"
 }
-if ($statusOutput -match "Publishable\s+[│|]?\s*(sb_publishable_[^\s│]+)") {
-    $publishableKey = $Matches[1].Trim()
-}
-if (-not $projectUrl) {
-    $projectUrl = "http://127.0.0.1:$ApiPort"
-}
-if (-not $publishableKey) {
-    Write-Fail "Could not extract the local Supabase publishable key."
-    exit 1
-}
-Write-Ok "Project URL: $projectUrl"
-Write-Ok "Publishable key detected."
+else {
+    Step "Starting local Supabase"
 
-Write-Step "Configuring Android Supabase client"
-$xmlDirectory = Split-Path -Parent $AndroidSupabaseXml
-if (-not (Test-Path $xmlDirectory)) {
-    New-Item -ItemType Directory -Force -Path $xmlDirectory | Out-Null
-}
-$escapedUrl = [System.Security.SecurityElement]::Escape($projectUrl)
-$escapedKey = [System.Security.SecurityElement]::Escape($publishableKey)
+    if (-not $backendRoot) {
+        Fail "Backend folder was not found."
+    }
 
-$supabaseXmlContent = @"
+    $docker =
+        Get-Command docker -ErrorAction SilentlyContinue
+
+    if (-not $docker) {
+        Fail "Docker is required for Local backend mode."
+    }
+
+    & docker info *> $null
+
+    Push-Location $backendRoot
+    try {
+        $statusOutput =
+            (& npx supabase status 2>&1 | Out-String)
+
+        if (
+            $LASTEXITCODE -ne 0 -or
+            $statusOutput -notmatch
+                "local development setup is running"
+        ) {
+            & npx supabase start
+
+            if ($LASTEXITCODE -ne 0) {
+                Fail "Supabase local stack failed to start."
+            }
+
+            $statusOutput =
+                (& npx supabase status 2>&1 | Out-String)
+        }
+    }
+    finally {
+        Pop-Location
+    }
+
+    $projectUrl =
+        "http://127.0.0.1:$apiPort"
+
+    $publishableKey =
+        $null
+
+    if (
+        $statusOutput -match
+        "Publishable\s+[│|]?\s*(sb_publishable_[^\s│]+)"
+    ) {
+        $publishableKey =
+            $Matches[1].Trim()
+    }
+
+    if (-not $publishableKey) {
+        Fail "Could not read the local publishable key."
+    }
+
+    $escapedUrl =
+        [System.Security.SecurityElement]::Escape(
+            $projectUrl
+        )
+
+    $escapedKey =
+        [System.Security.SecurityElement]::Escape(
+            $publishableKey
+        )
+
+    Set-Content `
+        -LiteralPath $supabaseXml `
+        -Encoding UTF8 `
+        -Value @"
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="supabase_url" translatable="false">$escapedUrl</string>
@@ -167,184 +253,151 @@ $supabaseXmlContent = @"
 </resources>
 "@
 
-Set-Content -LiteralPath $AndroidSupabaseXml -Value $supabaseXmlContent -Encoding UTF8
-Write-Ok "Updated: app\src\main\res\values\supabase.xml"
-
-$functionsPath = Join-Path $BackendRoot "supabase\functions"
-if (-not $NoFunctions -and (Test-Path $functionsPath)) {
-    $functionDirectories = @(Get-ChildItem $functionsPath -Directory -ErrorAction SilentlyContinue |
-        Where-Object { -not $_.Name.StartsWith("_") })
-
-    if ($functionDirectories.Count -gt 0) {
-        Write-Step "Checking local Edge Functions"
-        $deleteAccountDir = Join-Path $functionsPath "delete-account"
-        $functionsNeedServe = $true
-
-        if (Test-Path $deleteAccountDir) {
-            try {
-                $response = Invoke-WebRequest `
-                    -Uri "$projectUrl/functions/v1/delete-account" `
-                    -Method Options `
-                    -TimeoutSec 2 `
-                    -UseBasicParsing `
-                    -ErrorAction Stop
-
-                if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 500) {
-                    $functionsNeedServe = $false
-                }
-            } catch {
-            }
-        }
-
-        if ($functionsNeedServe) {
-            Write-Warn "Starting Supabase Edge Functions in a separate PowerShell window..."
-            $escapedBackend = $BackendRoot.Replace("'", "''")
-            $functionCommand = @"
-`$Host.UI.RawUI.WindowTitle = 'DhwaniMitra Edge Functions'
-Set-Location '$escapedBackend'
-Write-Host 'Serving DhwaniMitra Edge Functions...' -ForegroundColor Cyan
-npx supabase functions serve
-"@
-            Start-Process powershell.exe -ArgumentList @(
-                "-NoExit",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-Command",
-                $functionCommand
-            )
-            Start-Sleep -Seconds 4
-        } else {
-            Write-Ok "Edge Functions appear to be available."
-        }
-    }
+    Ok "Local Android backend configuration written."
 }
 
-Write-Step "Checking Android device"
-$Adb = Find-Adb
-if (-not $Adb) {
-    Write-Warn "adb.exe was not found."
-    Write-Host "Backend is running, but Android device setup was skipped."
+$adb =
+    Find-Adb
+
+if (-not $adb) {
+    Warn "ADB was not found. Backend checks completed; device operations skipped."
     exit 0
 }
-Write-Ok "ADB: $Adb"
 
-$deviceLines = & $Adb devices |
+Step "Checking Android devices"
+
+$devices = @(
+    & $adb devices |
     Select-Object -Skip 1 |
-    Where-Object { $_ -match "\sdevice$" }
-
-$devices = @()
-foreach ($line in $deviceLines) {
-    $serial = ($line -split "\s+")[0]
-    if ($serial) { $devices += $serial }
-}
+    Where-Object {
+        $_ -match "\sdevice$"
+    } |
+    ForEach-Object {
+        ($_ -split "\s+")[0]
+    }
+)
 
 if ($DeviceSerial) {
     if ($devices -notcontains $DeviceSerial) {
-        Write-Fail "Requested device is not connected: $DeviceSerial"
-        exit 1
+        Fail "Requested device is not connected: $DeviceSerial"
     }
-    $SelectedDevice = $DeviceSerial
-} elseif ($devices.Count -eq 0) {
-    Write-Warn "No Android device is connected."
-    Write-Host "Supabase is running, but ADB reverse / app launch were skipped."
-    exit 0
-} elseif ($devices.Count -eq 1) {
-    $SelectedDevice = $devices[0]
-} else {
-    $SelectedDevice = $devices[0]
-    Write-Warn "Multiple devices found. Using first: $SelectedDevice"
-}
-Write-Ok "Device: $SelectedDevice"
 
-Write-Step "Creating Android -> Supabase ADB reverse tunnel"
-& $Adb -s $SelectedDevice reverse "tcp:$ApiPort" "tcp:$ApiPort" | Out-Null
-if ($LASTEXITCODE -ne 0) {
-    Write-Fail "Could not create adb reverse mapping."
-    exit 1
+    $selectedDevice =
+        $DeviceSerial
+}
+elseif ($devices.Count -eq 0) {
+    Warn "No Android device is connected."
+    $selectedDevice =
+        $null
+}
+elseif ($devices.Count -eq 1) {
+    $selectedDevice =
+        $devices[0]
+}
+else {
+    Write-Host "Connected devices:"
+    $devices | ForEach-Object {
+        Write-Host "  $_"
+    }
+
+    Fail "More than one device/emulator is connected. Re-run with -DeviceSerial <serial>."
 }
 
-$reverseList = (& $Adb -s $SelectedDevice reverse --list | Out-String)
-if ($reverseList -notmatch "tcp:$ApiPort\s+tcp:$ApiPort") {
-    Write-Fail "ADB reverse mapping was not found after creation."
-    Write-Host $reverseList
-    exit 1
+if (
+    $BackendMode -eq "Local" -and
+    $selectedDevice
+) {
+    Step "Creating ADB reverse tunnel"
+
+    & $adb `
+        -s $selectedDevice `
+        reverse `
+        "tcp:$apiPort" `
+        "tcp:$apiPort"
+
+    if ($LASTEXITCODE -ne 0) {
+        Fail "ADB reverse failed."
+    }
+
+    Ok "Phone 127.0.0.1:$apiPort -> PC 127.0.0.1:$apiPort"
 }
-Write-Ok "Android 127.0.0.1:$ApiPort -> PC 127.0.0.1:$ApiPort"
 
 if ($Build) {
-    Write-Step "Building Android debug APK"
-    if (-not (Test-Path $Gradlew)) {
-        Write-Fail "gradlew.bat not found: $Gradlew"
-        exit 1
-    }
-    Push-Location $ProjectRoot
-    try {
-        & $Gradlew ":app:assembleDebug"
-        if ($LASTEXITCODE -ne 0) {
-            throw "Android build failed."
-        }
-    } finally {
-        Pop-Location
-    }
+    Step "Building Android APK"
 
-    if (-not (Test-Path $DebugApk)) {
-        Write-Fail "APK was not found: $DebugApk"
-        exit 1
-    }
-    Write-Ok "APK built: $DebugApk"
-}
+    & $gradlew ":app:assembleDebug"
 
-if ($Install) {
-    Write-Step "Installing DhwaniMitra on Android device"
-    if (-not (Test-Path $DebugApk)) {
-        Write-Fail "Debug APK not found. Use -Build -Install."
-        exit 1
-    }
-
-    & $Adb -s $SelectedDevice install -r $DebugApk
     if ($LASTEXITCODE -ne 0) {
-        Write-Fail "APK installation failed."
-        exit 1
+        Fail "Android build failed."
     }
 
-    & $Adb -s $SelectedDevice reverse "tcp:$ApiPort" "tcp:$ApiPort" | Out-Null
-    Write-Ok "DhwaniMitra installed."
+    if (-not (Test-Path $debugApk)) {
+        Fail "APK not found: $debugApk"
+    }
+
+    Ok "APK built."
 }
 
-if ($OpenStudio) {
-    Write-Step "Opening Supabase Studio"
-    Start-Process "http://127.0.0.1:$StudioPort"
+if (
+    $Install -and
+    $selectedDevice
+) {
+    if (-not (Test-Path $debugApk)) {
+        Fail "Debug APK is missing. Use -Build -Install."
+    }
+
+    Step "Installing APK"
+
+    & $adb `
+        -s $selectedDevice `
+        install `
+        -r `
+        $debugApk
+
+    if ($LASTEXITCODE -ne 0) {
+        Fail "APK installation failed."
+    }
+
+    Ok "APK installed."
 }
 
-if (-not $NoLaunch) {
-    Write-Step "Launching DhwaniMitra"
+if (
+    $OpenStudio -and
+    $BackendMode -eq "Local"
+) {
+    Start-Process `
+        "http://127.0.0.1:$studioPort"
+}
 
-    $packagePath = (& $Adb -s $SelectedDevice shell pm path $PackageName 2>$null | Out-String).Trim()
+if (
+    -not $NoLaunch -and
+    $selectedDevice
+) {
+    Step "Launching DhwaniMitra"
 
-    if ($packagePath -match "^package:") {
-        & $Adb -s $SelectedDevice shell am start -n "$PackageName/$LauncherActivity" | Out-Null
-        if ($LASTEXITCODE -eq 0) {
-            Write-Ok "DhwaniMitra launched."
-        } else {
-            Write-Warn "App is installed but LauncherActivity could not be started."
-        }
-    } else {
-        Write-Warn "DhwaniMitra is not installed on this device."
-        Write-Host "Use: .\Start-DhwaniMitra.ps1 -Build -Install"
+    & $adb `
+        -s $selectedDevice `
+        shell `
+        am `
+        start `
+        -n `
+        "$packageName/$launcherActivity" |
+        Out-Null
+
+    if ($LASTEXITCODE -eq 0) {
+        Ok "DhwaniMitra launched."
     }
 }
 
 Write-Host ""
-Write-Host "============================================" -ForegroundColor DarkGreen
-Write-Host " DhwaniMitra development environment ready " -ForegroundColor Green
-Write-Host "============================================" -ForegroundColor DarkGreen
+Write-Host "Ready." -ForegroundColor Green
+Write-Host "Backend mode : $BackendMode"
+if ($selectedDevice) {
+    Write-Host "Device       : $selectedDevice"
+}
 Write-Host ""
-Write-Host "Supabase API : $projectUrl"
-Write-Host "Studio       : http://127.0.0.1:$StudioPort"
-Write-Host "Android      : $SelectedDevice"
-Write-Host "ADB reverse  : tcp:$ApiPort -> tcp:$ApiPort"
+Write-Host "Hosted normal use:"
+Write-Host "  .\Start-DhwaniMitra.ps1 -BackendMode Hosted -Build -Install"
 Write-Host ""
-Write-Host "Build + install : .\Start-DhwaniMitra.ps1 -Build -Install"
-Write-Host "Open Studio     : .\Start-DhwaniMitra.ps1 -OpenStudio"
-Write-Host "Services only   : .\Start-DhwaniMitra.ps1 -NoLaunch"
-Write-Host ""
+Write-Host "Local development:"
+Write-Host "  .\Start-DhwaniMitra.ps1 -BackendMode Local -Build -Install"

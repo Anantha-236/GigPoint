@@ -1,7 +1,5 @@
 package com.example.gigpoint
 
-import com.example.gigpoint.data.DatabaseHelper
-
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
@@ -9,6 +7,7 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.example.gigpoint.data.DatabaseHelper
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import java.util.UUID
@@ -19,111 +18,63 @@ class BusinessSetupActivity : AppCompatActivity() {
     private val executor =
         Executors.newSingleThreadExecutor()
 
+    private val businessTypes =
+        listOf(
+            "Grocery / Kirana",
+            "General Store",
+            "Medical / Pharmacy",
+            "Clothing / Fashion",
+            "Mobile / Electronics",
+            "Electrical",
+            "Hardware",
+            "Bakery",
+            "Fruits & Vegetables",
+            "Restaurant / Food",
+            "Wholesale",
+            "Beauty / Cosmetics",
+            "Stationery",
+            "Automobile Parts",
+            "Other"
+        )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         AppPreferences(this).apply()
         super.onCreate(savedInstanceState)
-        setContentView(
-            R.layout.activity_business_setup
-        )
+        setContentView(R.layout.activity_business_setup)
 
-        supportActionBar?.title =
-            "Business Setup"
-
-        val owner =
-            findViewById<TextInputEditText>(
-                R.id.etOwnerName
-            )
-
-        val shop =
-            findViewById<TextInputEditText>(
-                R.id.etShopName
-            )
-
-        val gstin =
-            findViewById<TextInputEditText>(
-                R.id.etGstin
-            )
-
-        val city =
-            findViewById<TextInputEditText>(
-                R.id.etCity
-            )
-
-        val area =
-            findViewById<TextInputEditText>(
-                R.id.etArea
-            )
-
-        val business =
-            findViewById<Spinner>(
-                R.id.spinnerBusinessType
-            )
-
-        val language =
-            findViewById<Spinner>(
-                R.id.spinnerLanguage
-            )
-
-        val theme =
-            findViewById<Spinner>(
-                R.id.spinnerTheme
-            )
-
-        val status =
-            findViewById<TextView>(
-                R.id.tvSetupStatus
-            )
-
-        val save =
-            findViewById<MaterialButton>(
-                R.id.btnSaveBusiness
-            )
+        val owner = findViewById<TextInputEditText>(R.id.etOwnerName)
+        val shop = findViewById<TextInputEditText>(R.id.etShopName)
+        val gstin = findViewById<TextInputEditText>(R.id.etGstin)
+        val city = findViewById<TextInputEditText>(R.id.etCity)
+        val area = findViewById<TextInputEditText>(R.id.etArea)
+        val business = findViewById<Spinner>(R.id.spinnerBusinessType)
+        val language = findViewById<Spinner>(R.id.spinnerLanguage)
+        val theme = findViewById<Spinner>(R.id.spinnerTheme)
+        val status = findViewById<TextView>(R.id.tvSetupStatus)
+        val save = findViewById<MaterialButton>(R.id.btnSaveBusiness)
 
         business.adapter =
             ArrayAdapter(
                 this,
-                android.R.layout
-                    .simple_spinner_dropdown_item,
-                listOf(
-                    "Grocery / Kirana",
-                    "General Store",
-                    "Medical Store",
-                    "Bakery",
-                    "Fruits & Vegetables",
-                    "Hardware",
-                    "Clothing",
-                    "Restaurant / Food",
-                    "Wholesale",
-                    "Other"
-                )
+                android.R.layout.simple_spinner_dropdown_item,
+                businessTypes
             )
 
         language.adapter =
             ArrayAdapter(
                 this,
-                android.R.layout
-                    .simple_spinner_dropdown_item,
-                listOf(
-                    "English",
-                    "Telugu",
-                    "Hindi"
-                )
+                android.R.layout.simple_spinner_dropdown_item,
+                listOf("English", "Telugu", "Hindi")
             )
 
         theme.adapter =
             ArrayAdapter(
                 this,
-                android.R.layout
-                    .simple_spinner_dropdown_item,
-                listOf(
-                    "System",
-                    "Light",
-                    "Dark"
-                )
+                android.R.layout.simple_spinner_dropdown_item,
+                listOf("System", "Light", "Dark")
             )
 
-        val userId =
-            SessionManager(this).userId()
+        val userId = SessionManager(this).userId()
 
         if (userId.isNullOrBlank()) {
             goToLogin()
@@ -136,9 +87,7 @@ class BusinessSetupActivity : AppCompatActivity() {
             owner.setText(it.ownerName)
 
             language.setSelection(
-                when (
-                    it.preferredLanguage
-                ) {
+                when (it.preferredLanguage) {
                     "te" -> 1
                     "hi" -> 2
                     else -> 0
@@ -154,39 +103,41 @@ class BusinessSetupActivity : AppCompatActivity() {
             )
         }
 
-        db.getShopForOwner(userId)?.let {
+        val existingShop = db.getShopForOwner(userId)
+
+        existingShop?.let {
             shop.setText(it.shopName)
             gstin.setText(it.gstin.orEmpty())
             city.setText(it.city.orEmpty())
             area.setText(it.area.orEmpty())
+
+            val index =
+                businessTypes.indexOfFirst { type ->
+                    type.equals(it.businessType, ignoreCase = true)
+                }
+
+            if (index >= 0) {
+                business.setSelection(index)
+            }
         }
 
         db.close()
 
         save.setOnClickListener {
             val ownerName =
-                owner.text?.toString()
-                    ?.trim()
-                    .orEmpty()
+                owner.text?.toString()?.trim().orEmpty()
 
             val shopName =
-                shop.text?.toString()
-                    ?.trim()
-                    .orEmpty()
+                shop.text?.toString()?.trim().orEmpty()
 
-            if (
-                ownerName.isBlank() ||
-                shopName.isBlank()
-            ) {
+            if (ownerName.isBlank() || shopName.isBlank()) {
                 status.text =
-                    "Owner name and shop name are required."
+                    "Owner name and business name are required."
                 return@setOnClickListener
             }
 
             val languageCode =
-                when (
-                    language.selectedItemPosition
-                ) {
+                when (language.selectedItemPosition) {
                     1 -> "te"
                     2 -> "hi"
                     else -> "en"
@@ -199,90 +150,58 @@ class BusinessSetupActivity : AppCompatActivity() {
                     else -> "system"
                 }
 
-            val existingDb =
-                DatabaseHelper(this)
-
-            val existingShop =
-                existingDb.getShopForOwner(
-                    userId
-                )
+            val localDb = DatabaseHelper(this)
+            val previousShop = localDb.getShopForOwner(userId)
 
             val profile =
                 MerchantProfile(
                     userId = userId,
                     ownerName = ownerName,
                     phone = null,
-                    preferredLanguage =
-                        languageCode,
+                    preferredLanguage = languageCode,
                     theme = themeCode,
-                    syncStatus =
-                        DatabaseHelper.SYNC_PENDING
+                    syncStatus = DatabaseHelper.SYNC_PENDING
                 )
 
             val shopProfile =
                 ShopProfile(
                     id =
-                        existingShop?.id
-                            ?: UUID.randomUUID()
-                                .toString(),
+                        previousShop?.id
+                            ?: UUID.randomUUID().toString(),
                     ownerId = userId,
                     shopName = shopName,
                     gstin =
                         gstin.text?.toString()
                             ?.trim()
-                            ?.takeIf {
-                                it.isNotBlank()
-                            },
+                            ?.takeIf { it.isNotBlank() },
                     businessType =
-                        business.selectedItem
-                            .toString(),
+                        business.selectedItem.toString(),
                     city =
                         city.text?.toString()
                             ?.trim()
-                            ?.takeIf {
-                                it.isNotBlank()
-                            },
+                            ?.takeIf { it.isNotBlank() },
                     area =
                         area.text?.toString()
                             ?.trim()
-                            ?.takeIf {
-                                it.isNotBlank()
-                            },
-                    syncStatus =
-                        DatabaseHelper.SYNC_PENDING
+                            ?.takeIf { it.isNotBlank() },
+                    syncStatus = DatabaseHelper.SYNC_PENDING
                 )
 
-            // Local first.
-            existingDb.saveMerchantProfile(
-                profile
-            )
+            localDb.saveMerchantProfile(profile)
+            localDb.saveShop(shopProfile)
+            localDb.close()
 
-            existingDb.saveShop(
-                shopProfile
-            )
-
-            existingDb.close()
-
-            AppPreferences(this)
-                .setLanguage(languageCode)
-
-            AppPreferences(this)
-                .setTheme(themeCode)
+            AppPreferences(this).setLanguage(languageCode)
+            AppPreferences(this).setTheme(themeCode)
 
             save.isEnabled = false
-            status.text =
-                "Saving business details…"
+            status.text = "Saving business details…"
 
             executor.execute {
                 try {
-                    val session =
-                        SessionManager(this)
-
                     val token =
-                        session.accessToken()
-                            ?: error(
-                                "Login session is missing."
-                            )
+                        SessionManager(this).accessToken()
+                            ?: error("Login session is missing.")
 
                     BackendClient(this)
                         .completeBusinessSetup(
@@ -291,35 +210,21 @@ class BusinessSetupActivity : AppCompatActivity() {
                             shopProfile
                         )
 
-                    val syncedDb =
-                        DatabaseHelper(this)
-
-                    syncedDb
-                        .markMerchantSetupSynced(
-                            userId
-                        )
-
+                    val syncedDb = DatabaseHelper(this)
+                    syncedDb.markMerchantSetupSynced(userId)
                     syncedDb.close()
 
                     runOnUiThread {
-                        showWelcome(
-                            ownerName,
-                            shopName
-                        )
+                        showWelcome(ownerName, shopName)
                     }
                 } catch (e: Exception) {
-                    // Do not throw away merchant-entered data.
-                    // It remains cached locally and can be synced later.
                     runOnUiThread {
                         save.isEnabled = true
                         status.text =
                             "Saved on this phone. Cloud backup failed: " +
-                            (e.message ?: "unknown error")
+                                (e.message ?: "unknown error")
 
-                        showWelcome(
-                            ownerName,
-                            shopName
-                        )
+                        showWelcome(ownerName, shopName)
                     }
                 }
             }
@@ -331,15 +236,12 @@ class BusinessSetupActivity : AppCompatActivity() {
         shopName: String
     ) {
         AlertDialog.Builder(this)
-            .setTitle(
-                "Welcome to DhwaniMitra, $ownerName!"
-            )
+            .setTitle("Welcome, $ownerName")
             .setMessage(
-                "From now on, I'm your companion at $shopName. " +
-                "I'll help you manage stock, purchases, sales and the items that need your attention."
+                "DhwaniMitra will adapt the dashboard, product focus and companion vocabulary for $shopName."
             )
             .setCancelable(false)
-            .setPositiveButton("Start") { _, _ ->
+            .setPositiveButton("Open dashboard") { _, _ ->
                 startActivity(
                     Intent(
                         this,

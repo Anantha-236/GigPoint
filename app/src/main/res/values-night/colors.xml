@@ -1,33 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#5DD99B</color>
-    <color name="primary_dark">#45C486</color>
-    <color name="primary_deep">#32A972</color>
-    <color name="primary_soft">#183D2D</color>
-    <color name="primary_soft_2">#142A21</color>
-    <color name="success">#5DD99B</color>
-    <color name="success_soft">#193D2E</color>
-    <color name="warning">#F2B85A</color>
-    <color name="warning_soft">#3A3020</color>
-    <color name="danger">#FF8585</color>
-    <color name="danger_soft">#402525</color>
-    <color name="info">#77B4F1</color>
-    <color name="info_soft">#1F3144</color>
-    <color name="bg_screen">#0D1511</color>
-    <color name="card_bg">#17221C</color>
-    <color name="surface_secondary">#202D26</color>
-    <color name="surface_green">#173126</color>
-    <color name="outline">#314139</color>
-    <color name="outline_strong">#43564C</color>
-    <color name="text_primary">#F2F7F4</color>
-    <color name="text_secondary">#B1BFB7</color>
-    <color name="text_muted">#829189</color>
+    <color name="primary">#61D7A2</color>
+    <color name="primary_dark">#3DB983</color>
+    <color name="primary_deep">#113C2D</color>
+    <color name="primary_soft">#18382B</color>
+    <color name="primary_soft_2">#122A21</color>
+
+    <color name="success">#61D7A2</color>
+    <color name="success_soft">#18382B</color>
+
+    <color name="warning">#F1B457</color>
+    <color name="warning_soft">#3A2D19</color>
+
+    <color name="danger">#FF7D85</color>
+    <color name="danger_soft">#3A2225</color>
+
+    <color name="info">#84B5FF</color>
+    <color name="info_soft">#1A2B43</color>
+
+    <color name="bg_screen">#0E1511</color>
+    <color name="card_bg">#17201B</color>
+    <color name="surface_secondary">#202B25</color>
+    <color name="surface_elevated">#1C2721</color>
+    <color name="surface_green">#173526</color>
+    <color name="companion_surface">#123F30</color>
+    <color name="nav_background">#141D18</color>
+
+    <color name="outline">#2D3932</color>
+    <color name="outline_strong">#425047</color>
+    <color name="chart_grid">#2B3730</color>
+
+    <color name="text_primary">#F3F7F4</color>
+    <color name="text_secondary">#B2BDB6</color>
+    <color name="text_muted">#85928A</color>
+
+    <!-- Splash screen compatibility -->
+    <color name="splash_bg">#113C2D</color>
+
     <color name="white">#FFFFFFFF</color>
     <color name="white_80">#CCFFFFFF</color>
+    <color name="white_16">#29FFFFFF</color>
     <color name="black">#FF000000</color>
-    <color name="purple_200">#5DD99B</color>
-    <color name="purple_500">#5DD99B</color>
-    <color name="purple_700">#45C486</color>
-    <color name="teal_200">#5DD99B</color>
-    <color name="teal_700">#45C486</color>
+
+    <color name="purple_200">#61D7A2</color>
+    <color name="purple_500">#61D7A2</color>
+    <color name="purple_700">#3DB983</color>
+    <color name="teal_200">#61D7A2</color>
+    <color name="teal_700">#3DB983</color>
 </resources>

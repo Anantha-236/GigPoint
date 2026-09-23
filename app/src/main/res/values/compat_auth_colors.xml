@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compatibility resources retained for existing auth/splash drawables. -->
+    <color name="bg_auth_top">#F3FBF7</color>
+    <color name="bg_auth_bottom">#E6F5ED</color>
+    <color name="splash_icon_bg">#FFFFFFFF</color>
+</resources>

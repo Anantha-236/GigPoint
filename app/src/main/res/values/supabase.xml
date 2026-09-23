@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="supabase_url" translatable="false">http://127.0.0.1:55321</string>
-    <string name="supabase_publishable_key" translatable="false">sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH</string>
+    <string name="supabase_url" translatable="false">https://rkjqsxbcqvacjwwqjssh.supabase.co</string>
+    <string name="supabase_publishable_key" translatable="false">sb_publishable_fuqrRp2UMgVWc5zI5kpNcA_4rRFMnfW</string>
 </resources>

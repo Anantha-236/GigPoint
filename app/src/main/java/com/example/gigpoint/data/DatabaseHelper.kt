@@ -124,40 +124,157 @@ class DatabaseHelper(context: Context) :
         )
     }
 
-    private fun seedDemoData(db: SQLiteDatabase) {
-        val existing =
-            db.rawQuery(
-                "SELECT COUNT(*) FROM products",
-                null
-            ).use {
-                if (it.moveToFirst()) it.getInt(0) else 0
+    private fun seedDemoData(
+    db: SQLiteDatabase
+) {
+    val existing =
+        db.rawQuery(
+            "SELECT COUNT(*) FROM products",
+            null
+        ).use {
+            cursor ->
+
+            if (
+                cursor.moveToFirst()
+            ) {
+                cursor.getInt(
+                    0
+                )
+            } else {
+                0
             }
-
-        if (existing > 0) return
-
-        val now = System.currentTimeMillis()
-
-        listOf(
-            arrayOf("Rice", "bag", 20.0, 5.0),
-            arrayOf("Sugar", "kg", 12.0, 10.0),
-            arrayOf("Sunflower Oil", "carton", 4.0, 5.0),
-            arrayOf("Coca-Cola", "carton", 8.0, 4.0),
-            arrayOf("Parle-G", "box", 0.0, 3.0)
-        ).forEach { row ->
-            db.insert(
-                "products",
-                null,
-                ContentValues().apply {
-                    put("name", row[0] as String)
-                    put("unit", row[1] as String)
-                    put("quantity", row[2] as Double)
-                    put("minimum_stock", row[3] as Double)
-                    put("updated_at", now)
-                    put("sync_status", SYNC_SYNCED)
-                }
-            )
         }
+
+    if (
+        existing >
+        0
+    ) {
+        return
     }
+
+    val now =
+        System.currentTimeMillis()
+
+    data class SeedProduct(
+        val name: String,
+        val unit: String,
+        val quantity: Double,
+        val minimumStock: Double
+    )
+
+    val demoProducts =
+        listOf(
+            SeedProduct(
+                name =
+                    "Rice",
+
+                unit =
+                    "bag",
+
+                quantity =
+                    20.0,
+
+                minimumStock =
+                    5.0
+            ),
+
+            SeedProduct(
+                name =
+                    "Sugar",
+
+                unit =
+                    "kg",
+
+                quantity =
+                    12.0,
+
+                minimumStock =
+                    10.0
+            ),
+
+            SeedProduct(
+                name =
+                    "Sunflower Oil",
+
+                unit =
+                    "carton",
+
+                quantity =
+                    4.0,
+
+                minimumStock =
+                    5.0
+            ),
+
+            SeedProduct(
+                name =
+                    "Coca-Cola",
+
+                unit =
+                    "carton",
+
+                quantity =
+                    8.0,
+
+                minimumStock =
+                    4.0
+            ),
+
+            SeedProduct(
+                name =
+                    "Parle-G",
+
+                unit =
+                    "box",
+
+                quantity =
+                    0.0,
+
+                minimumStock =
+                    3.0
+            )
+        )
+
+    demoProducts.forEach {
+        product ->
+
+        db.insert(
+            "products",
+            null,
+            ContentValues().apply {
+                put(
+                    "name",
+                    product.name
+                )
+
+                put(
+                    "unit",
+                    product.unit
+                )
+
+                put(
+                    "quantity",
+                    product.quantity
+                )
+
+                put(
+                    "minimum_stock",
+                    product.minimumStock
+                )
+
+                put(
+                    "updated_at",
+                    now
+                )
+
+                put(
+                    "sync_status",
+                    SYNC_SYNCED
+                )
+            }
+        )
+    }
+}       
 
     fun saveMerchantProfile(profile: MerchantProfile) {
         writableDatabase.insertWithOnConflict(

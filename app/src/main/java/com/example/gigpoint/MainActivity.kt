@@ -1,48 +1,58 @@
 package com.example.gigpoint
 
-import com.example.gigpoint.data.DatabaseHelper
-import com.example.gigpoint.domain.Product
-
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.speech.tts.TextToSpeech
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.text.InputType
-import android.widget.ImageView
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
+import com.example.gigpoint.actions.VoiceActionExecutor
+import com.example.gigpoint.data.DatabaseHelper
+import com.example.gigpoint.domain.Product
+import com.example.gigpoint.ui.DashboardExperience
+import com.example.gigpoint.voice.OfflineAudioRecorder
+import com.example.gigpoint.voice.VoiceConversationManager
+import com.example.gigpoint.voice.VoiceTurn
+import com.example.gigpoint.voice.WhisperEngine
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.Chip
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executors
-import com.example.gigpoint.voice.OfflineAudioRecorder
-import com.example.gigpoint.voice.WhisperEngine
-import com.example.gigpoint.voice.VoiceConversationManager
-import com.example.gigpoint.actions.VoiceActionExecutor
-import com.example.gigpoint.voice.VoiceTurn
 
 class MainActivity : AppCompatActivity() {
 
+    private enum class ProductFilter {
+        ALL,
+        LOW,
+        OUT
+    }
+
     private lateinit var db: DatabaseHelper
-    private val parser = CommandParser()
 
     private val voiceWorker =
+        Executors.newSingleThreadExecutor()
+
+    private val cloudWorker =
         Executors.newSingleThreadExecutor()
 
     private lateinit var audioRecorder:
@@ -57,9 +67,75 @@ class MainActivity : AppCompatActivity() {
     private lateinit var voiceActionExecutor:
         VoiceActionExecutor
 
-    private var voiceRecording = false
+    private var voiceRecording =
+        false
 
-    private var tts: TextToSpeech? = null
+    private var tts:
+        TextToSpeech? =
+        null
+
+    private var productFilter =
+        ProductFilter.ALL
+
+    private lateinit var tvProductCount:
+        TextView
+
+    private lateinit var tvLowStockCount:
+        TextView
+
+    private lateinit var tvOutOfStockCount:
+        TextView
+
+    private lateinit var tvPendingCount:
+        TextView
+
+    private lateinit var tvConnectionStatus:
+        TextView
+
+    private lateinit var tvVoiceResult:
+        TextView
+
+    private lateinit var tvLanguageHelp:
+        TextView
+
+    private lateinit var tvTodaySales:
+        TextView
+
+    private lateinit var tvTodayProfit:
+        TextView
+
+    private lateinit var tvTodayBills:
+        TextView
+
+    private lateinit var inventoryContainer:
+        LinearLayout
+
+    private lateinit var alertsContainer:
+        LinearLayout
+
+    private lateinit var transactionsContainer:
+        LinearLayout
+
+    private lateinit var etCommand:
+        TextInputEditText
+
+    private lateinit var etProductSearch:
+        TextInputEditText
+
+    private lateinit var languageSpinner:
+        Spinner
+
+    private lateinit var switchInternet:
+        SwitchMaterial
+
+    private lateinit var btnSync:
+        MaterialButton
+
+    private val dateFormat =
+        SimpleDateFormat(
+            "dd MMM, hh:mm a",
+            Locale.getDefault()
+        )
 
     private val microphonePermission =
         registerForActivityResult(
@@ -69,52 +145,32 @@ class MainActivity : AppCompatActivity() {
                 startVoiceRecording()
             } else {
                 toast(
-                    "Microphone permission is required for voice inventory commands."
+                    "Microphone permission is required for voice commands."
                 )
             }
         }
-
-    private lateinit var tvProductCount: TextView
-    private lateinit var tvLowStockCount: TextView
-    private lateinit var tvOutOfStockCount: TextView
-    private lateinit var tvPendingCount: TextView
-    private lateinit var tvConnectionStatus: TextView
-    private lateinit var tvVoiceResult: TextView
-    private lateinit var tvLanguageHelp: TextView
-
-    private lateinit var inventoryContainer: LinearLayout
-    private lateinit var alertsContainer: LinearLayout
-    private lateinit var transactionsContainer: LinearLayout
-
-    private lateinit var etCommand: TextInputEditText
-    private lateinit var languageSpinner: Spinner
-    private lateinit var switchInternet: SwitchMaterial
-    private lateinit var btnSync: MaterialButton
-
-    private val dateFormat =
-        SimpleDateFormat(
-            "dd MMM, hh:mm a",
-            Locale.getDefault()
-        )
 
     override fun onCreate(
         savedInstanceState: Bundle?
     ) {
         AppPreferences(this).apply()
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val session = SessionManager(this)
+        val session =
+            SessionManager(this)
 
         if (!session.hasSession()) {
             goToLogin()
             return
         }
 
-        db = DatabaseHelper(this)
+        db =
+            DatabaseHelper(this)
 
-        val userId = session.userId()
+        val userId =
+            session.userId()
+
         val profile =
             userId?.let {
                 db.getMerchantProfile(it)
@@ -125,25 +181,21 @@ class MainActivity : AppCompatActivity() {
                 db.getShopForOwner(it)
             }
 
-        supportActionBar?.title =
-            "DhwaniMitra"
-
-        supportActionBar?.subtitle =
-            listOfNotNull(
-                profile?.ownerName
-                    ?.takeIf(String::isNotBlank),
-                shop?.shopName
-                    ?.takeIf(String::isNotBlank)
-            ).joinToString(" • ")
-
         bindViews()
 
         setupModernHeader(
-            profile?.ownerName,
-            shop?.shopName
+            ownerName =
+                profile?.ownerName,
+            shop =
+                shop
+        )
+
+        applyDashboardExperience(
+            shop?.businessType
         )
 
         setupBottomNavigation()
+        setupProductSearchAndFilters()
 
         audioRecorder =
             OfflineAudioRecorder()
@@ -160,7 +212,7 @@ class MainActivity : AppCompatActivity() {
         initTts()
 
         tvVoiceResult.text =
-            "Loading offline Whisper model…"
+            "Preparing DhwaniMitra voice…"
 
         voiceWorker.execute {
             try {
@@ -168,12 +220,14 @@ class MainActivity : AppCompatActivity() {
 
                 runOnUiThread {
                     tvVoiceResult.text =
-                        "Voice assistant ready. Tap the microphone and speak naturally."
+                        "Voice is ready. Speak naturally in English, Telugu, Hindi, or mixed speech."
                 }
             } catch (e: Exception) {
                 runOnUiThread {
                     tvVoiceResult.text =
-                        "Whisper model is not ready: ${e.message}"
+                        "Voice model is not ready: ${
+                            e.message ?: "unknown error"
+                        }"
                 }
             }
         }
@@ -182,42 +236,32 @@ class MainActivity : AppCompatActivity() {
             profile?.preferredLanguage
                 ?: "en"
         )
+
         setupActions()
         refreshAll()
+
+        loadHostedDashboard(
+            session =
+                session,
+            shopId =
+                shop?.id
+        )
     }
 
-    override fun onCreateOptionsMenu(
-        menu: Menu
-    ): Boolean {
-        menu.add("Account")
-            .setShowAsAction(
-                MenuItem.SHOW_AS_ACTION_NEVER
-            )
+    override fun onResume() {
+        super.onResume()
 
-        return true
-    }
-
-    override fun onOptionsItemSelected(
-        item: MenuItem
-    ): Boolean {
-        return if (
-            item.title == "Account"
-        ) {
-            startActivity(
-                Intent(
-                    this,
-                    AccountActivity::class.java
-                )
-            )
-            true
-        } else {
-            super.onOptionsItemSelected(item)
+        if (::db.isInitialized) {
+            refreshAll()
         }
     }
 
     override fun onDestroy() {
         try {
-            if (::audioRecorder.isInitialized && audioRecorder.isRecording()) {
+            if (
+                ::audioRecorder.isInitialized &&
+                audioRecorder.isRecording()
+            ) {
                 audioRecorder.stop()
             }
         } catch (_: Exception) {
@@ -231,6 +275,7 @@ class MainActivity : AppCompatActivity() {
         tts?.shutdown()
 
         voiceWorker.shutdownNow()
+        cloudWorker.shutdownNow()
 
         if (::db.isInitialized) {
             db.close()
@@ -239,56 +284,101 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun goToLogin() {
-        startActivity(
-            Intent(
-                this,
-                LoginActivity::class.java
-            ).apply {
-                flags =
-                    Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-        )
-        finish()
-    }
-
     private fun bindViews() {
         tvProductCount =
-            findViewById(R.id.tvProductCount)
+            findViewById(
+                R.id.tvProductCount
+            )
+
         tvLowStockCount =
-            findViewById(R.id.tvLowStockCount)
+            findViewById(
+                R.id.tvLowStockCount
+            )
+
         tvOutOfStockCount =
-            findViewById(R.id.tvOutOfStockCount)
+            findViewById(
+                R.id.tvOutOfStockCount
+            )
+
         tvPendingCount =
-            findViewById(R.id.tvPendingCount)
+            findViewById(
+                R.id.tvPendingCount
+            )
+
         tvConnectionStatus =
-            findViewById(R.id.tvConnectionStatus)
+            findViewById(
+                R.id.tvConnectionStatus
+            )
+
         tvVoiceResult =
-            findViewById(R.id.tvVoiceResult)
+            findViewById(
+                R.id.tvVoiceResult
+            )
+
         tvLanguageHelp =
-            findViewById(R.id.tvLanguageHelp)
+            findViewById(
+                R.id.tvLanguageHelp
+            )
+
+        tvTodaySales =
+            findViewById(
+                R.id.tvTodaySales
+            )
+
+        tvTodayProfit =
+            findViewById(
+                R.id.tvTodayProfit
+            )
+
+        tvTodayBills =
+            findViewById(
+                R.id.tvTodayBills
+            )
 
         inventoryContainer =
-            findViewById(R.id.inventoryContainer)
+            findViewById(
+                R.id.inventoryContainer
+            )
+
         alertsContainer =
-            findViewById(R.id.alertsContainer)
+            findViewById(
+                R.id.alertsContainer
+            )
+
         transactionsContainer =
-            findViewById(R.id.transactionsContainer)
+            findViewById(
+                R.id.transactionsContainer
+            )
 
         etCommand =
-            findViewById(R.id.etCommand)
+            findViewById(
+                R.id.etCommand
+            )
+
+        etProductSearch =
+            findViewById(
+                R.id.etProductSearch
+            )
+
         languageSpinner =
-            findViewById(R.id.languageSpinner)
+            findViewById(
+                R.id.languageSpinner
+            )
+
         switchInternet =
-            findViewById(R.id.switchInternet)
+            findViewById(
+                R.id.switchInternet
+            )
+
         btnSync =
-            findViewById(R.id.btnSync)
+            findViewById(
+                R.id.btnSync
+            )
     }
 
     private fun setupModernHeader(
         ownerName: String?,
-        shopName: String?
+        shop: ShopProfile?
     ) {
         val cleanOwner =
             ownerName
@@ -297,27 +387,70 @@ class MainActivity : AppCompatActivity() {
                     it.isNotBlank()
                 }
 
-        val cleanShop =
-            shopName
-                ?.trim()
-                ?.takeIf {
-                    it.isNotBlank()
-                }
+        val greeting =
+            when (
+                Calendar.getInstance()
+                    .get(
+                        Calendar.HOUR_OF_DAY
+                    )
+            ) {
+                in 5..11 ->
+                    "Good morning"
+
+                in 12..16 ->
+                    "Good afternoon"
+
+                in 17..21 ->
+                    "Good evening"
+
+                else ->
+                    "Welcome"
+            }
 
         findViewById<TextView>(
             R.id.tvGreeting
         ).text =
             cleanOwner
                 ?.let {
-                    "Welcome, $it"
+                    "$greeting, $it"
                 }
-                ?: "Welcome to DhwaniMitra"
+                ?: "$greeting to DhwaniMitra"
 
         findViewById<TextView>(
             R.id.tvShopName
         ).text =
-            cleanShop
-                ?: "Your shop companion"
+            shop?.shopName
+                ?.takeIf {
+                    it.isNotBlank()
+                }
+                ?: "Your business"
+
+        findViewById<TextView>(
+            R.id.tvShopLocation
+        ).text =
+            listOfNotNull(
+                shop?.city
+                    ?.takeIf {
+                        it.isNotBlank()
+                    },
+                shop?.area
+                    ?.takeIf {
+                        it.isNotBlank()
+                    }
+            )
+                .joinToString(" • ")
+                .ifBlank {
+                    shop?.businessType
+                        ?.takeIf {
+                            it.isNotBlank()
+                        }
+                        ?: "Merchant workspace"
+                }
+
+        findViewById<TextView>(
+            R.id.tvRoleBadge
+        ).text =
+            "OWNER"
 
         val accountButton =
             findViewById<TextView>(
@@ -333,6 +466,63 @@ class MainActivity : AppCompatActivity() {
 
         accountButton.setOnClickListener {
             openAccount()
+        }
+    }
+
+    private fun applyDashboardExperience(
+        businessType: String?
+    ) {
+        val experience =
+            DashboardExperience
+                .forBusinessType(
+                    businessType
+                )
+
+        findViewById<TextView>(
+            R.id.tvExperienceLabel
+        ).text =
+            experience.label
+
+        findViewById<TextView>(
+            R.id.tvExperienceSubtitle
+        ).text =
+            experience.subtitle
+
+        findViewById<TextView>(
+            R.id.tvAttentionSubtitle
+        ).text =
+            experience.attentionSubtitle
+
+        findViewById<TextView>(
+            R.id.sectionInventory
+        ).text =
+            experience.productsTitle
+
+        findViewById<TextView>(
+            R.id.tvProductsSubtitle
+        ).text =
+            experience.productsSubtitle
+
+        findViewById<TextView>(
+            R.id.tvCompanionPrompt
+        ).text =
+            experience.companionPrompt
+
+        listOf(
+            R.id.tvFocusOne,
+            R.id.tvFocusTwo,
+            R.id.tvFocusThree
+        ).forEachIndexed {
+                index,
+                viewId ->
+
+            findViewById<TextView>(
+                viewId
+            ).text =
+                experience
+                    .focusTags
+                    .getOrNull(index)
+                    ?: ""
         }
     }
 
@@ -395,6 +585,37 @@ class MainActivity : AppCompatActivity() {
             R.id.btnNavMore
         ).setOnClickListener {
             openAccount()
+        }
+    }
+
+    private fun setupProductSearchAndFilters() {
+        etProductSearch
+            .doAfterTextChanged {
+                renderInventory()
+            }
+
+        findViewById<Chip>(
+            R.id.chipAll
+        ).setOnClickListener {
+            productFilter =
+                ProductFilter.ALL
+            renderInventory()
+        }
+
+        findViewById<Chip>(
+            R.id.chipLow
+        ).setOnClickListener {
+            productFilter =
+                ProductFilter.LOW
+            renderInventory()
+        }
+
+        findViewById<Chip>(
+            R.id.chipOut
+        ).setOnClickListener {
+            productFilter =
+                ProductFilter.OUT
+            renderInventory()
         }
     }
 
@@ -461,13 +682,17 @@ class MainActivity : AppCompatActivity() {
         findViewById<MaterialButton>(
             R.id.btnStockIn
         ).setOnClickListener {
-            showStockDialog("STOCK_IN")
+            showStockDialog(
+                "STOCK_IN"
+            )
         }
 
         findViewById<MaterialButton>(
             R.id.btnStockOut
         ).setOnClickListener {
-            showStockDialog("STOCK_OUT")
+            showStockDialog(
+                "STOCK_OUT"
+            )
         }
 
         findViewById<MaterialButton>(
@@ -486,36 +711,91 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        switchInternet
-            .setOnCheckedChangeListener {
-                    _,
-                    checked ->
-                updateConnectionState(
-                    checked
-                )
-            }
-
         btnSync.setOnClickListener {
-            if (!switchInternet.isChecked) {
-                toast(
-                    "No internet. Pending data remains safely stored on this phone."
-                )
-                return@setOnClickListener
-            }
-
-            // Current flat inventory schema is still local-only.
-            // Real cloud stock sync comes after Product/Variant migration.
-            val updated =
-                db.markEverythingSynced()
-
             toast(
-                "Prototype sync flag updated for $updated local record(s)."
+                "Cloud stock synchronization is not enabled yet. Local records remain unchanged."
             )
-
-            refreshAll()
         }
 
-        updateConnectionState(false)
+        updateConnectionState(
+            online = false,
+            label = "Checking cloud…"
+        )
+    }
+
+    private fun loadHostedDashboard(
+        session: SessionManager,
+        shopId: String?
+    ) {
+        val token =
+            session.accessToken()
+
+        if (
+            token.isNullOrBlank() ||
+            shopId.isNullOrBlank()
+        ) {
+            updateConnectionState(
+                online = false,
+                label = "Local mode"
+            )
+            return
+        }
+
+        cloudWorker.execute {
+            try {
+                val summary =
+                    BackendClient(this)
+                        .getDashboardSummary(
+                            accessToken =
+                                token,
+                            shopId =
+                                shopId
+                        )
+
+                val todaySales =
+                    summary.optDouble(
+                        "today_sales",
+                        0.0
+                    )
+
+                runOnUiThread {
+                    tvTodaySales.text =
+                        formatCurrency(
+                            todaySales
+                        )
+
+                    // Keep unknown values unknown until the Sales/COGS
+                    // data model exists. Never fabricate financial data.
+                    tvTodayProfit.text =
+                        "—"
+
+                    tvTodayBills.text =
+                        "—"
+
+                    findViewById<TextView>(
+                        R.id.tvAnalyticsNote
+                    ).text =
+                        "Live sales connected • Profit and bill count will activate with the Sales module."
+
+                    updateConnectionState(
+                        online = true,
+                        label = "Cloud connected"
+                    )
+                }
+            } catch (_: Exception) {
+                runOnUiThread {
+                    findViewById<TextView>(
+                        R.id.tvAnalyticsNote
+                    ).text =
+                        "Showing local inventory • Sales analytics are temporarily unavailable."
+
+                    updateConnectionState(
+                        online = false,
+                        label = "Local mode"
+                    )
+                }
+            }
+        }
     }
 
     private fun updateLanguageHelp(
@@ -524,42 +804,37 @@ class MainActivity : AppCompatActivity() {
         tvLanguageHelp.text =
             when (language) {
                 "Telugu" ->
-                    "Try: \"Rice five bags add cheyyi\" or \"Rice stock entha undi?\""
+                    "Voice understands Telugu + English mixed speech."
 
                 "Hindi" ->
-                    "Try: \"Rice five bags add karo\" or \"Rice stock kitna hai?\""
+                    "Voice understands Hindi + English mixed speech."
 
                 else ->
-                    "Try: \"Add 5 bags of rice\" or \"How much rice is available?\""
+                    "Voice recognition uses automatic language detection."
             }
     }
 
     private fun updateConnectionState(
-        online: Boolean
+        online: Boolean,
+        label: String
     ) {
-        if (online) {
-            tvConnectionStatus.text =
-                "ONLINE"
-            tvConnectionStatus
-                .setTextColor(
-                    getColor(
-                        R.color.success
-                    )
-                )
-            btnSync.isEnabled = true
-        } else {
-            tvConnectionStatus.text =
-                "OFFLINE - saved on device"
-            tvConnectionStatus
-                .setTextColor(
-                    getColor(
-                        R.color.warning
-                    )
-                )
-            btnSync.isEnabled = false
-        }
-    }
+        switchInternet.isChecked =
+            online
 
+        tvConnectionStatus.text =
+            label
+
+        tvConnectionStatus
+            .setTextColor(
+                getColor(
+                    if (online) {
+                        R.color.success
+                    } else {
+                        R.color.warning
+                    }
+                )
+            )
+    }
 
     private fun initTts() {
         tts =
@@ -576,31 +851,43 @@ class MainActivity : AppCompatActivity() {
     private fun updateTtsLanguage() {
         val locale =
             when (
-                languageSpinner.selectedItem
+                languageSpinner
+                    .selectedItem
                     ?.toString()
             ) {
                 "Telugu" ->
-                    Locale("te", "IN")
+                    Locale.forLanguageTag(
+                        "te-IN"
+                    )
 
                 "Hindi" ->
-                    Locale("hi", "IN")
+                    Locale.forLanguageTag(
+                        "hi-IN"
+                    )
 
                 else ->
-                    Locale("en", "IN")
+                    Locale.forLanguageTag(
+                        "en-IN"
+                    )
             }
 
-        tts?.language = locale
+        tts?.language =
+            locale
     }
 
-    private fun speak(text: String) {
+    private fun speak(
+        text: String
+    ) {
         updateTtsLanguage()
 
-        val engine = tts ?: return
+        val engine =
+            tts ?: return
 
         if (
             engine.isLanguageAvailable(
                 engine.language
-            ) >= TextToSpeech.LANG_AVAILABLE
+            ) >=
+            TextToSpeech.LANG_AVAILABLE
         ) {
             engine.speak(
                 text,
@@ -618,14 +905,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.RECORD_AUDIO
-            ) !=
-            PackageManager.PERMISSION_GRANTED
+            ContextCompat
+                .checkSelfPermission(
+                    this,
+                    Manifest.permission
+                        .RECORD_AUDIO
+                ) !=
+            PackageManager
+                .PERMISSION_GRANTED
         ) {
             microphonePermission.launch(
-                Manifest.permission.RECORD_AUDIO
+                Manifest.permission
+                    .RECORD_AUDIO
             )
             return
         }
@@ -635,24 +926,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun startVoiceRecording() {
         try {
-            // Prevent DhwaniMitra's own TTS from being captured as user speech.
             tts?.stop()
-
             audioRecorder.start()
             voiceRecording = true
 
             findViewById<MaterialButton>(
                 R.id.btnVoice
             ).text =
-                "STOP & UNDERSTAND"
+                "Listening… tap to finish"
 
             tvVoiceResult.text =
-                "Listening… Speak one short inventory command."
-
+                "Listening. Speak naturally."
         } catch (e: Exception) {
             tvVoiceResult.text =
-                e.message ?:
-                "Could not start microphone."
+                e.message
+                    ?: "Could not start microphone."
         }
     }
 
@@ -662,33 +950,28 @@ class MainActivity : AppCompatActivity() {
         findViewById<MaterialButton>(
             R.id.btnVoice
         ).text =
-            "TAP TO SPEAK"
+            "Talk to DhwaniMitra"
 
         val audio =
             audioRecorder.stop()
 
         if (
             !audioRecorder
-                .looksLikeUsefulAudio(audio)
+                .looksLikeUsefulAudio(
+                    audio
+                )
         ) {
             val message =
                 "I did not hear enough speech. Please try again closer to the phone."
 
             tvVoiceResult.text =
                 message
-
             speak(message)
-
             return
         }
 
         tvVoiceResult.text =
-            "Understanding your command offline…"
-
-        // Voice recognition is independent from the UI/TTS language.
-        // Auto mode is required for English + Telugu + Hindi code-switching.
-        val language =
-            "auto"
+            "Understanding…"
 
         val inventoryPrompt =
             whisperEngine
@@ -704,7 +987,7 @@ class MainActivity : AppCompatActivity() {
                 val transcript =
                     whisperEngine.transcribe(
                         audio,
-                        language,
+                        "auto",
                         inventoryPrompt
                     )
 
@@ -729,21 +1012,21 @@ class MainActivity : AppCompatActivity() {
                         }
 
                     tvLanguageHelp.text =
-                        "Voice recognition: Auto / Mixed • primary detected language: $detectedLabel"
+                        "Auto / mixed recognition • primary detected: $detectedLabel"
 
                     handleVoiceTranscript(
                         transcript
                     )
                 }
-
             } catch (e: Exception) {
                 runOnUiThread {
                     val message =
-                        "Voice processing failed: ${e.message}"
+                        "Voice processing failed: ${
+                            e.message ?: "unknown error"
+                        }"
 
                     tvVoiceResult.text =
                         message
-
                     speak(message)
                 }
             }
@@ -759,9 +1042,7 @@ class MainActivity : AppCompatActivity() {
 
             tvVoiceResult.text =
                 message
-
             speak(message)
-
             return
         }
 
@@ -780,17 +1061,13 @@ class MainActivity : AppCompatActivity() {
         when (turn) {
             is VoiceTurn.Ask -> {
                 tvVoiceResult.text =
-                    "Heard:\n" +
-                    etCommand.text
-                        ?.toString()
-                        .orEmpty() +
-                    "\n\nDhwaniMitra:\n" +
                     turn.question
 
                 speak(turn.question)
 
                 if (
-                    turn.choices.isNotEmpty()
+                    turn.choices
+                        .isNotEmpty()
                 ) {
                     AlertDialog.Builder(this)
                         .setTitle(
@@ -803,15 +1080,14 @@ class MainActivity : AppCompatActivity() {
                             turn.choices
                                 .toTypedArray()
                         ) { _, which ->
-                            val next =
+                            renderVoiceTurn(
                                 conversationManager
                                     .choose(
                                         turn.choices[
                                             which
                                         ]
                                     )
-
-                            renderVoiceTurn(next)
+                            )
                         }
                         .setPositiveButton(
                             "Answer by voice"
@@ -831,16 +1107,13 @@ class MainActivity : AppCompatActivity() {
             is VoiceTurn.Answer -> {
                 tvVoiceResult.text =
                     turn.text
-
                 speak(turn.text)
-
                 conversationManager.reset()
             }
 
             is VoiceTurn.Confirm -> {
                 tvVoiceResult.text =
                     turn.prompt
-
                 speak(turn.prompt)
 
                 AlertDialog.Builder(this)
@@ -885,7 +1158,6 @@ class MainActivity : AppCompatActivity() {
             is VoiceTurn.Error -> {
                 tvVoiceResult.text =
                     turn.message
-
                 speak(turn.message)
 
                 if (!turn.keepContext) {
@@ -896,197 +1168,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showVoicePrototypeDialog() {
-        val options =
-            when (
-                languageSpinner
-                    .selectedItem
-                    .toString()
-            ) {
-                "Hindi" ->
-                    arrayOf(
-                        "Rice five bags add karo",
-                        "Sugar do kg nikalo",
-                        "Rice stock kitna hai?",
-                        "Low stock items batao"
-                    )
-
-                "English" ->
-                    arrayOf(
-                        "Add 5 bags of rice",
-                        "Remove 2 kg sugar",
-                        "How much rice is available?",
-                        "Show low stock items"
-                    )
-
-                else ->
-                    arrayOf(
-                        "Rice five bags add cheyyi",
-                        "Sugar rendu kg teesey",
-                        "Rice stock entha undi?",
-                        "Low stock items enti?"
-                    )
-            }
-
-        AlertDialog.Builder(this)
-            .setTitle("Voice prototype")
-            .setMessage(
-                "Whisper Tiny Q5_1 is the next input-layer integration. Choose a sample transcript to test the real parser and local inventory write."
-            )
-            .setItems(options) {
-                    _,
-                    which ->
-                etCommand.setText(
-                    options[which]
-                )
-                processCommand(
-                    options[which]
-                )
-            }
-            .setNegativeButton(
-                "Cancel",
-                null
-            )
-            .show()
-    }
-
-    private fun processCommand(
-        rawText: String
-    ) {
-        val parsed =
-            parser.parse(
-                rawText,
-                db.getProducts()
-            )
-
-        if (parsed.error != null) {
-            tvVoiceResult.text =
-                "Not understood\n${parsed.error}"
-            return
-        }
-
-        when (parsed.intent) {
-            CommandIntent.LOW_STOCK -> {
-                val low =
-                    db.getLowStockProducts()
-
-                tvVoiceResult.text =
-                    if (low.isEmpty()) {
-                        "No products are currently below their minimum stock level."
-                    } else {
-                        "Low stock:\n" +
-                            low.joinToString(
-                                "\n"
-                            ) {
-                                "${it.name}: ${formatQty(it.quantity)} ${it.unit}"
-                            }
-                    }
-            }
-
-            CommandIntent.CHECK_STOCK -> {
-                val product =
-                    parsed.product!!
-
-                tvVoiceResult.text =
-                    "${product.name}: ${formatQty(product.quantity)} ${product.unit} available."
-            }
-
-            CommandIntent.STOCK_IN,
-            CommandIntent.STOCK_OUT ->
-                showVoiceConfirmation(
-                    parsed
-                )
-
-            else -> {
-                tvVoiceResult.text =
-                    "Command not supported in this prototype."
-            }
-        }
-    }
-
-    private fun showVoiceConfirmation(
-        command: ParsedCommand
-    ) {
-        val product =
-            command.product ?: return
-
-        val quantity =
-            command.quantity ?: return
-
-        val typeText =
-            if (
-                command.intent ==
-                CommandIntent.STOCK_IN
-            )
-                "STOCK IN"
-            else
-                "STOCK OUT"
-
-        val summary =
-            """
-            Transcript:
-            ${command.originalText}
-
-            Interpreted as:
-            Operation: $typeText
-            Product: ${product.name}
-            Quantity: ${formatQty(quantity)}
-            Unit: ${command.unit ?: product.unit}
-            """.trimIndent()
-
-        tvVoiceResult.text =
-            summary
-
-        AlertDialog.Builder(this)
-            .setTitle(
-                "Confirm voice command"
-            )
-            .setMessage(summary)
-            .setNegativeButton(
-                "Cancel",
-                null
-            )
-            .setPositiveButton(
-                "Confirm"
-            ) { _, _ ->
-                val type =
-                    if (
-                        command.intent ==
-                        CommandIntent.STOCK_IN
-                    )
-                        "STOCK_IN"
-                    else
-                        "STOCK_OUT"
-
-                val result =
-                    db.adjustStock(
-                        productId =
-                            product.id,
-                        type = type,
-                        quantity =
-                            quantity,
-                        source = "VOICE",
-                        transcript =
-                            command.originalText
-                    )
-
-                toast(result.second)
-
-                if (result.first) {
-                    tvVoiceResult.text =
-                        "Saved locally.\n${result.second}\nWaiting for cloud sync."
-                    refreshAll()
-                }
-            }
-            .show()
-    }
-
     private fun showAddProductDialog() {
         val container =
             dialogContainer()
 
         val name =
-            editText("Product name")
+            editText(
+                "Product name"
+            )
 
         val unit =
             editText(
@@ -1110,8 +1199,12 @@ class MainActivity : AppCompatActivity() {
 
         val dialog =
             AlertDialog.Builder(this)
-                .setTitle("Add product")
-                .setView(container)
+                .setTitle(
+                    "Add product"
+                )
+                .setView(
+                    container
+                )
                 .setNegativeButton(
                     "Cancel",
                     null
@@ -1158,28 +1251,31 @@ class MainActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
-                val id =
+                try {
                     db.addProduct(
-                        productName,
-                        productUnit,
-                        openingQty,
-                        minimumQty
+                        name =
+                            productName,
+                        unit =
+                            productUnit,
+                        openingQuantity =
+                            openingQty,
+                        minimumStock =
+                            minimumQty
                     )
 
-                if (id == -1L) {
+                    dialog.dismiss()
+
                     toast(
-                        "A product with that name already exists."
+                        "Product saved locally."
                     )
-                    return@setOnClickListener
+
+                    refreshAll()
+                } catch (e: Exception) {
+                    toast(
+                        e.message
+                            ?: "Could not save product."
+                    )
                 }
-
-                dialog.dismiss()
-
-                toast(
-                    "Product saved locally."
-                )
-
-                refreshAll()
             }
         }
 
@@ -1210,25 +1306,37 @@ class MainActivity : AppCompatActivity() {
                         android.R.layout
                             .simple_spinner_dropdown_item,
                         products.map {
-                            "${it.name} (${formatQty(it.quantity)} ${it.unit})"
+                            "${it.name} (${
+                                formatQty(
+                                    it.quantity
+                                )
+                            } ${it.unit})"
                         }
                     )
             }
 
         val quantity =
-            numberEditText("Quantity")
+            numberEditText(
+                "Quantity"
+            )
 
         container.addView(
             productSpinner
         )
 
-        container.addView(quantity)
+        container.addView(
+            quantity
+        )
 
         val title =
-            if (type == "STOCK_IN")
+            if (
+                type ==
+                "STOCK_IN"
+            ) {
                 "Stock in"
-            else
+            } else {
                 "Stock out"
+            }
 
         val dialog =
             AlertDialog.Builder(this)
@@ -1273,12 +1381,17 @@ class MainActivity : AppCompatActivity() {
                     db.adjustStock(
                         productId =
                             selectedProduct.id,
-                        type = type,
-                        quantity = qty,
-                        source = "MANUAL"
+                        type =
+                            type,
+                        quantity =
+                            qty,
+                        source =
+                            "MANUAL"
                     )
 
-                toast(result.second)
+                toast(
+                    result.second
+                )
 
                 if (result.first) {
                     dialog.dismiss()
@@ -1295,16 +1408,20 @@ class MainActivity : AppCompatActivity() {
             db.getStats()
 
         tvProductCount.text =
-            stats.totalProducts.toString()
+            stats.totalProducts
+                .toString()
 
         tvLowStockCount.text =
-            stats.lowStock.toString()
+            stats.lowStock
+                .toString()
 
         tvOutOfStockCount.text =
-            stats.outOfStock.toString()
+            stats.outOfStock
+                .toString()
 
         tvPendingCount.text =
-            stats.pendingSync.toString()
+            stats.pendingSync
+                .toString()
 
         renderInventory()
         renderAlerts()
@@ -1315,12 +1432,81 @@ class MainActivity : AppCompatActivity() {
         inventoryContainer
             .removeAllViews()
 
+        val query =
+            etProductSearch.text
+                ?.toString()
+                ?.trim()
+                ?.lowercase()
+                .orEmpty()
+
+        val products =
+            db.getProducts()
+                .filter {
+                    query.isBlank() ||
+                        it.name
+                            .lowercase()
+                            .contains(
+                                query
+                            ) ||
+                        it.brand
+                            ?.lowercase()
+                            ?.contains(
+                                query
+                            ) ==
+                        true ||
+                        it.category
+                            ?.lowercase()
+                            ?.contains(
+                                query
+                            ) ==
+                        true
+                }
+                .filter {
+                    when (
+                        productFilter
+                    ) {
+                        ProductFilter.ALL ->
+                            true
+
+                        ProductFilter.LOW ->
+                            it.quantity >
+                                0.0 &&
+                                it.quantity <=
+                                it.minimumStock
+
+                        ProductFilter.OUT ->
+                            it.quantity <=
+                                0.0
+                    }
+                }
+
+        if (products.isEmpty()) {
+            inventoryContainer.addView(
+                emptyState(
+                    when {
+                        query.isNotBlank() ->
+                            "No products match \"$query\"."
+
+                        productFilter ==
+                            ProductFilter.LOW ->
+                            "No low-stock products."
+
+                        productFilter ==
+                            ProductFilter.OUT ->
+                            "No out-of-stock products."
+
+                        else ->
+                            "No products yet. Add your first product."
+                    }
+                )
+            )
+            return
+        }
+
         val inflater =
             LayoutInflater.from(this)
 
-        db.getProducts().forEach {
-                product ->
-
+        products.forEach { product ->
             val row =
                 inflater.inflate(
                     R.layout.item_product,
@@ -1333,17 +1519,17 @@ class MainActivity : AppCompatActivity() {
                     R.id.ivItemProductImage
                 )
 
-            val productAssetName =
-                ProductImageMapper
-                    .getAssetName(
-                        product.name
-                    )
-
             AssetImageLoader
                 .loadProduct(
-                    context = this,
-                    imageView = productImage,
-                    assetName = productAssetName
+                    context =
+                        this,
+                    imageView =
+                        productImage,
+                    assetName =
+                        ProductImageMapper
+                            .getAssetName(
+                                product.name
+                            )
                 )
 
             row.findViewById<TextView>(
@@ -1354,22 +1540,49 @@ class MainActivity : AppCompatActivity() {
             row.findViewById<TextView>(
                 R.id.tvItemProductQuantity
             ).text =
-                "${formatQty(product.quantity)} ${product.unit}"
+                "${formatQty(
+                    product.quantity
+                )} ${product.unit}"
 
-            row.findViewById<TextView>(
-                R.id.tvItemProductStatus
-            ).text =
+            val status =
+                row.findViewById<TextView>(
+                    R.id.tvItemProductStatus
+                )
+
+            status.text =
                 when {
-                    product.quantity <= 0 ->
-                        "OUT OF STOCK"
+                    product.quantity <=
+                        0.0 ->
+                        "Out of stock"
 
                     product.quantity <=
                         product.minimumStock ->
-                        "LOW - minimum ${formatQty(product.minimumStock)} ${product.unit}"
+                        "Low stock • reorder at ${
+                            formatQty(
+                                product.minimumStock
+                            )
+                        } ${product.unit}"
 
                     else ->
-                        "In stock"
+                        "Available"
                 }
+
+            status.setTextColor(
+                getColor(
+                    when {
+                        product.quantity <=
+                            0.0 ->
+                            R.color.danger
+
+                        product.quantity <=
+                            product.minimumStock ->
+                            R.color.warning
+
+                        else ->
+                            R.color.success
+                    }
+                )
+            )
 
             val sync =
                 row.findViewById<TextView>(
@@ -1377,55 +1590,96 @@ class MainActivity : AppCompatActivity() {
                 )
 
             sync.text =
-                product.syncStatus
+                if (
+                    product.syncStatus ==
+                    DatabaseHelper.SYNC_SYNCED
+                ) {
+                    "SYNCED"
+                } else {
+                    "LOCAL"
+                }
 
             sync.setTextColor(
                 getColor(
                     if (
                         product.syncStatus ==
                         DatabaseHelper.SYNC_SYNCED
-                    )
+                    ) {
                         R.color.success
-                    else
+                    } else {
                         R.color.warning
+                    }
                 )
             )
 
+            row.setOnClickListener {
+                showProductSnapshot(
+                    product
+                )
+            }
+
             inventoryContainer
-                .addView(row)
+                .addView(
+                    row
+                )
         }
+    }
+
+    private fun showProductSnapshot(
+        product: Product
+    ) {
+        val status =
+            when {
+                product.quantity <=
+                    0.0 ->
+                    "Out of stock"
+
+                product.quantity <=
+                    product.minimumStock ->
+                    "Low stock"
+
+                else ->
+                    "Available"
+            }
+
+        AlertDialog.Builder(this)
+            .setTitle(
+                product.name
+            )
+            .setMessage(
+                """
+                Availability: $status
+                Current stock: ${formatQty(product.quantity)} ${product.unit}
+                Reorder level: ${formatQty(product.minimumStock)} ${product.unit}
+
+                Sales, profit, variants and price history will appear here when Product 360 is connected to the Sales and Variant modules.
+                """.trimIndent()
+            )
+            .setPositiveButton(
+                "OK",
+                null
+            )
+            .show()
     }
 
     private fun renderAlerts() {
         alertsContainer
             .removeAllViews()
 
-        val inflater =
-            LayoutInflater.from(this)
-
         val low =
             db.getLowStockProducts()
 
         if (low.isEmpty()) {
             alertsContainer.addView(
-                TextView(this).apply {
-                    text =
-                        "No low-stock alerts."
-                    setTextColor(
-                        getColor(
-                            R.color.text_secondary
-                        )
-                    )
-                    setPadding(
-                        8,
-                        12,
-                        8,
-                        12
-                    )
-                }
+                emptyState(
+                    "Nothing urgent in current local stock."
+                )
             )
             return
         }
+
+        val inflater =
+            LayoutInflater.from(this)
 
         low.forEach { product ->
             val row =
@@ -1443,10 +1697,29 @@ class MainActivity : AppCompatActivity() {
             row.findViewById<TextView>(
                 R.id.tvAlertDetail
             ).text =
-                "Current: ${formatQty(product.quantity)} ${product.unit}  |  " +
-                "Minimum: ${formatQty(product.minimumStock)} ${product.unit}"
+                if (
+                    product.quantity <=
+                    0.0
+                ) {
+                    "Out of stock • reorder level ${
+                        formatQty(
+                            product.minimumStock
+                        )
+                    } ${product.unit}"
+                } else {
+                    "${formatQty(
+                        product.quantity
+                    )} ${product.unit} left • reorder at ${
+                        formatQty(
+                            product.minimumStock
+                        )
+                    } ${product.unit}"
+                }
 
-            alertsContainer.addView(row)
+            alertsContainer
+                .addView(
+                    row
+                )
         }
     }
 
@@ -1454,37 +1727,22 @@ class MainActivity : AppCompatActivity() {
         transactionsContainer
             .removeAllViews()
 
-        val inflater =
-            LayoutInflater.from(this)
-
         val transactions =
             db.getTransactions()
 
         if (transactions.isEmpty()) {
-            transactionsContainer
-                .addView(
-                    TextView(this).apply {
-                        text =
-                            "No transactions yet."
-                        setTextColor(
-                            getColor(
-                                R.color.text_secondary
-                            )
-                        )
-                        setPadding(
-                            8,
-                            12,
-                            8,
-                            12
-                        )
-                    }
+            transactionsContainer.addView(
+                emptyState(
+                    "No activity yet."
                 )
+            )
             return
         }
 
-        transactions.forEach {
-                transaction ->
+        val inflater =
+            LayoutInflater.from(this)
 
+        transactions.forEach { transaction ->
             val row =
                 inflater.inflate(
                     R.layout.item_transaction,
@@ -1492,24 +1750,37 @@ class MainActivity : AppCompatActivity() {
                     false
                 )
 
+            val outbound =
+                transaction.type in
+                    setOf(
+                        "STOCK_OUT",
+                        "SALE",
+                        "DAMAGE",
+                        "EXPIRED",
+                        "SUPPLIER_RETURN",
+                        "TRANSFER_OUT"
+                    )
+
             val symbol =
-                if (
-                    transaction.type ==
-                    "STOCK_IN"
-                )
+                if (outbound) {
+                    "−"
+                } else {
                     "+"
-                else
-                    "-"
+                }
 
             row.findViewById<TextView>(
                 R.id.tvTxTitle
             ).text =
-                "$symbol${formatQty(transaction.quantity)} ${transaction.unit}  ${transaction.productName}"
+                "$symbol${
+                    formatQty(
+                        transaction.quantity
+                    )
+                } ${transaction.unit} • ${transaction.productName}"
 
             row.findViewById<TextView>(
                 R.id.tvTxMeta
             ).text =
-                "${transaction.source}  |  ${
+                "${transaction.source} • ${
                     dateFormat.format(
                         Date(
                             transaction.createdAt
@@ -1523,30 +1794,64 @@ class MainActivity : AppCompatActivity() {
                 )
 
             sync.text =
-                transaction.syncStatus
+                if (
+                    transaction.syncStatus ==
+                    DatabaseHelper.SYNC_SYNCED
+                ) {
+                    "SYNCED"
+                } else {
+                    "LOCAL"
+                }
 
             sync.setTextColor(
                 getColor(
                     if (
                         transaction.syncStatus ==
                         DatabaseHelper.SYNC_SYNCED
-                    )
+                    ) {
                         R.color.success
-                    else
+                    } else {
                         R.color.warning
+                    }
                 )
             )
 
             transactionsContainer
-                .addView(row)
+                .addView(
+                    row
+                )
         }
     }
+
+    private fun emptyState(
+        message: String
+    ): TextView =
+        TextView(this).apply {
+            text = message
+
+            setTextColor(
+                getColor(
+                    R.color.text_secondary
+                )
+            )
+
+            textSize =
+                13f
+
+            setPadding(
+                dp(4),
+                dp(12),
+                dp(4),
+                dp(16)
+            )
+        }
 
     private fun dialogContainer():
         LinearLayout =
         LinearLayout(this).apply {
             orientation =
                 LinearLayout.VERTICAL
+
             setPadding(
                 dp(24),
                 dp(8),
@@ -1559,7 +1864,8 @@ class MainActivity : AppCompatActivity() {
         hint: String
     ): EditText =
         EditText(this).apply {
-            this.hint = hint
+            this.hint =
+                hint
             setSingleLine(true)
         }
 
@@ -1567,37 +1873,80 @@ class MainActivity : AppCompatActivity() {
         hint: String
     ): EditText =
         EditText(this).apply {
-            this.hint = hint
+            this.hint =
+                hint
+
             inputType =
                 InputType.TYPE_CLASS_NUMBER or
-                InputType.TYPE_NUMBER_FLAG_DECIMAL
+                    InputType.TYPE_NUMBER_FLAG_DECIMAL
+
             setSingleLine(true)
         }
 
     private fun formatQty(
         value: Double
     ): String =
-        if (value % 1.0 == 0.0)
-            value.toLong().toString()
-        else
-            "%.2f".format(value)
+        if (
+            value %
+                1.0 ==
+            0.0
+        ) {
+            value
+                .toLong()
+                .toString()
+        } else {
+            "%.2f".format(
+                value
+            )
+        }
+
+    private fun formatCurrency(
+        value: Double
+    ): String =
+        NumberFormat
+            .getCurrencyInstance(
+                Locale.forLanguageTag(
+                    "en-IN"
+                )
+            )
+            .format(
+                value
+            )
 
     private fun toast(
         message: String
-    ) =
+    ) {
         Toast.makeText(
             this,
             message,
             Toast.LENGTH_SHORT
         ).show()
+    }
 
     private fun dp(
         value: Int
     ): Int =
         (
             value *
-            resources.displayMetrics.density
+                resources
+                    .displayMetrics
+                    .density
         ).toInt()
+
+    private fun goToLogin() {
+        startActivity(
+            Intent(
+                this,
+                LoginActivity::class.java
+            ).apply {
+                flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+        )
+
+        finish()
+    }
 }
 
 class SimpleItemSelectedListener(
@@ -1609,14 +1958,19 @@ class SimpleItemSelectedListener(
     override fun onItemSelected(
         parent:
             android.widget.AdapterView<*>?,
-        view: View?,
-        position: Int,
-        id: Long
-    ) =
+        view:
+            View?,
+        position:
+            Int,
+        id:
+            Long
+    ) {
         onSelected()
+    }
 
     override fun onNothingSelected(
         parent:
             android.widget.AdapterView<*>?
-    ) = Unit
+    ) =
+        Unit
 }

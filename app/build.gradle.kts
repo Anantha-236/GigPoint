@@ -1,19 +1,20 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
     namespace = "com.example.gigpoint"
 
-    compileSdk {
-        version = release(37)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.gigpoint"
 
         minSdk = 24
-        targetSdk = 37
+        targetSdk = 36
 
         versionCode = 1
         versionName = "1.0"
@@ -21,23 +22,12 @@ android {
         testInstrumentationRunner =
             "androidx.test.runner.AndroidJUnitRunner"
 
-        /*
-         * DhwaniMitra currently targets modern
-         * 64-bit Android devices.
-         *
-         * This reduces APK size because we only
-         * package ARM64 Whisper/GGML libraries.
-         */
         ndk {
             abiFilters += listOf(
                 "arm64-v8a"
             )
         }
 
-        /*
-         * Whisper should always be compiled
-         * using optimized native code.
-         */
         externalNativeBuild {
             cmake {
                 arguments += listOf(
@@ -48,15 +38,21 @@ android {
         }
     }
 
+    /*
+     * AGP 8 disables BuildConfig generation by default.
+     *
+     * BackendClient uses BuildConfig.DEBUG to allow localhost
+     * connections only during debug builds, so BuildConfig must
+     * explicitly be generated.
+     */
+    buildFeatures {
+        buildConfig = true
+    }
+
     buildTypes {
-
         debug {
+            isDebuggable = true
 
-            /*
-             * Keep Whisper/GGML optimized even
-             * while the Android application itself
-             * is a debug build.
-             */
             externalNativeBuild {
                 cmake {
                     arguments += listOf(
@@ -68,10 +64,15 @@ android {
         }
 
         release {
+            isDebuggable = false
+            isMinifyEnabled = false
 
-            optimization {
-                enable = false
-            }
+            proguardFiles(
+                getDefaultProguardFile(
+                    "proguard-android-optimize.txt"
+                ),
+                "proguard-rules.pro"
+            )
         }
     }
 
@@ -83,14 +84,8 @@ android {
             JavaVersion.VERSION_11
     }
 
-    /*
-     * NDK r28+ generates 16 KB aligned
-     * native libraries by default.
-     *
-     * Required for modern Android devices
-     * and Google Play 16 KB page-size support.
-     */
-    ndkVersion = "28.2.13676358"
+    ndkVersion =
+        "28.2.13676358"
 
     externalNativeBuild {
         cmake {
@@ -102,8 +97,15 @@ android {
     }
 }
 
-dependencies {
+kotlin {
+    compilerOptions {
+        jvmTarget.set(
+            JvmTarget.JVM_11
+        )
+    }
+}
 
+dependencies {
     implementation(
         libs.androidx.appcompat
     )

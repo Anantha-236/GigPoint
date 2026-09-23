@@ -1,27 +1,21 @@
 package com.example.gigpoint
 
-import com.example.gigpoint.data.DatabaseHelper
-
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.gigpoint.data.DatabaseHelper
 
 class LauncherActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AppPreferences(this).apply()
+
         super.onCreate(savedInstanceState)
 
         val session = SessionManager(this)
 
         if (!session.hasSession()) {
-            startActivity(
-                Intent(
-                    this,
-                    LoginActivity::class.java
-                )
-            )
-            finish()
+            openLogin()
             return
         }
 
@@ -29,31 +23,42 @@ class LauncherActivity : AppCompatActivity() {
 
         if (userId.isNullOrBlank()) {
             session.clear()
-            startActivity(
-                Intent(
-                    this,
-                    LoginActivity::class.java
-                )
-            )
-            finish()
+            openLogin()
             return
         }
 
-        // Offline-first:
-        // if we already know this authenticated merchant locally,
-        // enter immediately even when the PC/cloud is unavailable.
         val db = DatabaseHelper(this)
 
-        val destination =
-            if (db.isMerchantSetupComplete(userId))
-                MainActivity::class.java
-            else
-                BusinessSetupActivity::class.java
+        val setupComplete =
+            try {
+                db.isMerchantSetupComplete(userId)
+            } finally {
+                db.close()
+            }
 
-        db.close()
+        val destination =
+            if (setupComplete) {
+                MainActivity::class.java
+            } else {
+                BusinessSetupActivity::class.java
+            }
 
         startActivity(
-            Intent(this, destination)
+            Intent(
+                this,
+                destination
+            )
+        )
+
+        finish()
+    }
+
+    private fun openLogin() {
+        startActivity(
+            Intent(
+                this,
+                LoginActivity::class.java
+            )
         )
 
         finish()

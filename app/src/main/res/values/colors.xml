@@ -1,33 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#168A55</color>
-    <color name="primary_dark">#09633D</color>
-    <color name="primary_deep">#064A31</color>
-    <color name="primary_soft">#E7F6EE</color>
-    <color name="primary_soft_2">#F1FAF5</color>
+    <color name="primary">#12845A</color>
+    <color name="primary_dark">#096342</color>
+    <color name="primary_deep">#064B35</color>
+    <color name="primary_soft">#E8F6EF</color>
+    <color name="primary_soft_2">#F2FAF6</color>
+
     <color name="success">#168A55</color>
-    <color name="success_soft">#E7F6EE</color>
-    <color name="warning">#D88918</color>
-    <color name="warning_soft">#FFF5E2</color>
-    <color name="danger">#D64C4C</color>
-    <color name="danger_soft">#FFF0F0</color>
-    <color name="info">#377CC8</color>
-    <color name="info_soft">#EEF5FD</color>
-    <color name="bg_screen">#F7F9F7</color>
+    <color name="success_soft">#E8F6EF</color>
+
+    <color name="warning">#C97A12</color>
+    <color name="warning_soft">#FFF4DF</color>
+
+    <color name="danger">#C9474F</color>
+    <color name="danger_soft">#FFF0F1</color>
+
+    <color name="info">#356FC0</color>
+    <color name="info_soft">#EEF4FD</color>
+
+    <color name="bg_screen">#F6F8F6</color>
     <color name="card_bg">#FFFFFFFF</color>
-    <color name="surface_secondary">#F0F4F1</color>
+    <color name="surface_secondary">#EFF3F0</color>
+    <color name="surface_elevated">#FFFFFFFF</color>
     <color name="surface_green">#EDF8F2</color>
-    <color name="outline">#DEE7E1</color>
-    <color name="outline_strong">#C8D7CE</color>
-    <color name="text_primary">#16231C</color>
-    <color name="text_secondary">#607068</color>
-    <color name="text_muted">#87948D</color>
+    <color name="companion_surface">#0A563D</color>
+    <color name="nav_background">#FFFFFFFF</color>
+
+    <color name="outline">#E0E7E2</color>
+    <color name="outline_strong">#C9D5CD</color>
+    <color name="chart_grid">#E6ECE8</color>
+
+    <color name="text_primary">#17231D</color>
+    <color name="text_secondary">#637169</color>
+    <color name="text_muted">#8A958F</color>
+
+    <!-- Splash screen compatibility -->
+    <color name="splash_bg">#064B35</color>
+
     <color name="white">#FFFFFFFF</color>
     <color name="white_80">#CCFFFFFF</color>
+    <color name="white_16">#29FFFFFF</color>
     <color name="black">#FF000000</color>
+
+    <!-- Compatibility colours used by older screens/resources -->
     <color name="purple_200">#7CCAA5</color>
-    <color name="purple_500">#168A55</color>
-    <color name="purple_700">#09633D</color>
+    <color name="purple_500">#12845A</color>
+    <color name="purple_700">#096342</color>
     <color name="teal_200">#7CCAA5</color>
-    <color name="teal_700">#168A55</color>
+    <color name="teal_700">#12845A</color>
 </resources>

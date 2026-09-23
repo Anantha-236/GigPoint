@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_auth_top">#0E1712</color>
+    <color name="bg_auth_bottom">#14231B</color>
+    <color name="splash_icon_bg">#F4FFF8</color>
+</resources>

@@ -1,0 +1,155 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10.0"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "_deps/ggml-build",
+					"childIndexes" : 
+					[
+						2
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-_deps.ggml-build-Debug-6db8f15c0a4636863dd9.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "C:/Users/anant/OneDrive/Desktop/GigPoint/third_party/whisper.cpp/ggml"
+				},
+				{
+					"build" : "_deps/ggml-build/src",
+					"childIndexes" : 
+					[
+						3
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-_deps.ggml-build.src-Debug-8de323406a0c783220d5.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "C:/Users/anant/OneDrive/Desktop/GigPoint/third_party/whisper.cpp/ggml/src",
+					"targetIndexes" : 
+					[
+						1,
+						2,
+						3
+					]
+				},
+				{
+					"build" : "_deps/ggml-build/src/ggml-cpu",
+					"jsonFile" : "directory-_deps.ggml-build.src.ggml-cpu-Debug-93fe7b931054203a187c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 1,
+					"source" : "C:/Users/anant/OneDrive/Desktop/GigPoint/third_party/whisper.cpp/ggml/src/ggml-cpu"
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "dhwani_whisper",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1,
+						2,
+						3
+					],
+					"name" : "ggml",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "dhwani_whisper::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-dhwani_whisper-Debug-082c451b83283e13f702.json",
+					"name" : "dhwani_whisper",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "ggml::@13ca10ed1afff475bcb7",
+					"jsonFile" : "target-ggml-Debug-4470bf57177dbe16f3e6.json",
+					"name" : "ggml",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "ggml-base::@13ca10ed1afff475bcb7",
+					"jsonFile" : "target-ggml-base-Debug-8a427b86efdd04878181.json",
+					"name" : "ggml-base",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "ggml-cpu::@13ca10ed1afff475bcb7",
+					"jsonFile" : "target-ggml-cpu-Debug-58be8fe7d9935671e730.json",
+					"name" : "ggml-cpu",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/anant/OneDrive/Desktop/GigPoint/app/.cxx/Debug/481g302v/arm64-v8a",
+		"source" : "C:/Users/anant/OneDrive/Desktop/GigPoint/app/src/main/cpp/whisper"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

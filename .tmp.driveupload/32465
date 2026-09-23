@@ -1,0 +1,34 @@
+ninja: Entering directory `C:\Users\anant\OneDrive\Desktop\GigPoint\app\.cxx\Debug\481g302v\arm64-v8a'
+[1/33] Building CXX object CMakeFiles/dhwani_whisper.dir/C_/Users/anant/OneDrive/Desktop/GigPoint/third_party/whisper.cpp/src/aneforge/whisper-aneforge.cpp.o
+[2/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/hbm.cpp.o
+[3/33] Building C object CMakeFiles/dhwani_whisper.dir/jni.c.o
+[4/33] Building C object _deps/ggml-build/src/CMakeFiles/ggml-base.dir/ggml-alloc.c.o
+[5/33] Building C object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/quants.c.o
+[6/33] Building C object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/ggml-cpu.c.o
+[7/33] Building C object _deps/ggml-build/src/CMakeFiles/ggml-base.dir/ggml-quants.c.o
+[8/33] Building C object _deps/ggml-build/src/CMakeFiles/ggml-base.dir/ggml.c.o
+[9/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-base.dir/ggml-threading.cpp.o
+[10/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-base.dir/ggml.cpp.o
+[11/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/traits.cpp.o
+[12/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/iqp.cpp.o
+[13/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml.dir/ggml-backend-dl.cpp.o
+[14/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/ggml-cpu.cpp.o
+[15/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/amx/amx.cpp.o
+[16/33] Building C object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/arch/arm/quants.c.o
+[17/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-base.dir/ggml-opt.cpp.o
+[18/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-base.dir/ggml-backend.cpp.o
+[19/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/amx/mmq.cpp.o
+[20/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/binary-ops.cpp.o
+[21/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/repack.cpp.o
+[22/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/vec.cpp.o
+[23/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml.dir/ggml-backend-reg.cpp.o
+[24/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/arch/arm/repack.cpp.o
+[25/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-base.dir/ggml-backend-meta.cpp.o
+[26/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-base.dir/gguf.cpp.o
+[27/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/unary-ops.cpp.o
+[28/33] Linking CXX shared library C:\Users\anant\OneDrive\Desktop\GigPoint\app\build\intermediates\cxx\Debug\481g302v\obj\arm64-v8a\libggml-base.so
+[29/33] Building CXX object _deps/ggml-build/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/ops.cpp.o
+[30/33] Linking CXX shared library C:\Users\anant\OneDrive\Desktop\GigPoint\app\build\intermediates\cxx\Debug\481g302v\obj\arm64-v8a\libggml-cpu.so
+[31/33] Linking CXX shared library C:\Users\anant\OneDrive\Desktop\GigPoint\app\build\intermediates\cxx\Debug\481g302v\obj\arm64-v8a\libggml.so
+[32/33] Building CXX object CMakeFiles/dhwani_whisper.dir/C_/Users/anant/OneDrive/Desktop/GigPoint/third_party/whisper.cpp/src/whisper.cpp.o
+[33/33] Linking CXX shared library C:\Users\anant\OneDrive\Desktop\GigPoint\app\build\intermediates\cxx\Debug\481g302v\obj\arm64-v8a\libdhwani_whisper.so

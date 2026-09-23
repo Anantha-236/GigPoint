@@ -10,7 +10,7 @@
     <string name="create_account">New here? Create account</string>
     <string name="create_account_title">Create account</string>
     <string name="already_have_account">Already have an account? Login</string>
-    <string name="tell_us_business">Set up your business</string>
+    <string name="tell_us_business">Tell DhwaniMitra about your business</string>
     <string name="owner_name">Owner name</string>
     <string name="shop_name">Shop / business name</string>
     <string name="gstin_optional">GSTIN (optional)</string>
@@ -19,4 +19,9 @@
     <string name="appearance">Appearance</string>
     <string name="continue_to_dhwani_mitra">Continue to DhwaniMitra</string>
     <string name="start">Start</string>
+    <string name="home">Home</string>
+    <string name="products">Products</string>
+    <string name="companion">Companion</string>
+    <string name="alerts">Alerts</string>
+    <string name="more">More</string>
 </resources>

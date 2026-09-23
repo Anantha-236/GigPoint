@@ -1,0 +1,21 @@
+# ninja log v5
+2	324	8117722350603300	ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-mkdir	f7356af9d119467d
+2	324	8117722350603300	C:/Users/anant/OneDrive/Desktop/GigPoint/app/.cxx/Debug/481g302v/arm64-v8a/_deps/ggml-subbuild/ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-mkdir	f7356af9d119467d
+325	419	8117722351555989	ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-download	bf00e243c911f77d
+325	419	8117722351555989	C:/Users/anant/OneDrive/Desktop/GigPoint/app/.cxx/Debug/481g302v/arm64-v8a/_deps/ggml-subbuild/ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-download	bf00e243c911f77d
+421	503	8117722352388408	ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-update	48c5264325748344
+421	503	8117722352388408	C:/Users/anant/OneDrive/Desktop/GigPoint/app/.cxx/Debug/481g302v/arm64-v8a/_deps/ggml-subbuild/ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-update	48c5264325748344
+503	584	8117722353219090	ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-patch	eba1205f85ce668d
+503	584	8117722353219090	C:/Users/anant/OneDrive/Desktop/GigPoint/app/.cxx/Debug/481g302v/arm64-v8a/_deps/ggml-subbuild/ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-patch	eba1205f85ce668d
+584	665	8117722354030496	ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-configure	5cb4e7a8eb2829c4
+584	665	8117722354030496	C:/Users/anant/OneDrive/Desktop/GigPoint/app/.cxx/Debug/481g302v/arm64-v8a/_deps/ggml-subbuild/ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-configure	5cb4e7a8eb2829c4
+666	757	8117722354908145	ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-build	3cc4650c35bc27dd
+666	757	8117722354908145	C:/Users/anant/OneDrive/Desktop/GigPoint/app/.cxx/Debug/481g302v/arm64-v8a/_deps/ggml-subbuild/ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-build	3cc4650c35bc27dd
+758	850	8117722355880593	ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-install	d1bb040b0ed8119b
+758	850	8117722355880593	C:/Users/anant/OneDrive/Desktop/GigPoint/app/.cxx/Debug/481g302v/arm64-v8a/_deps/ggml-subbuild/ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-install	d1bb040b0ed8119b
+851	934	8117722356615894	ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-test	54e9c7b68fe75098
+851	934	8117722356615894	C:/Users/anant/OneDrive/Desktop/GigPoint/app/.cxx/Debug/481g302v/arm64-v8a/_deps/ggml-subbuild/ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-test	54e9c7b68fe75098
+935	1057	8117722357932298	CMakeFiles/ggml-populate-complete	98fa95a73c018b99
+935	1057	8117722357932298	ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-done	98fa95a73c018b99
+935	1057	8117722357932298	C:/Users/anant/OneDrive/Desktop/GigPoint/app/.cxx/Debug/481g302v/arm64-v8a/_deps/ggml-subbuild/CMakeFiles/ggml-populate-complete	98fa95a73c018b99
+935	1057	8117722357932298	C:/Users/anant/OneDrive/Desktop/GigPoint/app/.cxx/Debug/481g302v/arm64-v8a/_deps/ggml-subbuild/ggml-populate-prefix/src/ggml-populate-stamp/ggml-populate-done	98fa95a73c018b99
